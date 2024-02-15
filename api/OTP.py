@@ -3,7 +3,7 @@ import random
 import time
 import string
 from datetime import datetime, timezone
-from .model import User, db
+from ..model import User, db
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
@@ -43,7 +43,7 @@ class OTPManager:
             "otp": self.otp
         })
     
-	def generate_access_token(self, identity, expires_delta=timedelta(minutes=15)):
+    def generate_access_token(self, identity, expires_delta=timedelta(minutes=15)):
         access_token = create_access_token(identity=identity, expires_delta=expires_delta)
         return access_token
     
@@ -57,13 +57,13 @@ class OTPManager:
         # Check if the OTP matches and is still valid (not expired)
         current_time = int(time.time())
         if user.OTP == input_otp and current_time < user.otp_expiry:
-        access_token = self.generate_access_token(identity=self.email)
-        return jsonify({
-            "message": f"OTP verified successfully for {self.email}",
-            "email": self.email,
-            "name": user.FirstName,  
-            "access_token": access_token
-        }), 200
-    else:
-        return jsonify({"error": "Invalid OTP. Please try again."}), 400
+            access_token = self.generate_access_token(identity=self.email)
+            return jsonify({
+                "message": f"OTP verified successfully for {self.email}",
+                "email": self.email,
+                "name": user.FirstName,  
+                "access_token": access_token
+            }), 200
+        else:
+            return jsonify({"error": "Invalid OTP. Please try again."}), 400
     

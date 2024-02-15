@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 91b6a51c4e6f
+Revision ID: d01e2671de0e
 Revises: 
-Create Date: 2024-02-09 09:27:36.630067
+Create Date: 2024-02-14 03:52:56.829502
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '91b6a51c4e6f'
+revision = 'd01e2671de0e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,11 +34,13 @@ def upgrade():
     op.create_table('users',
     sa.Column('UserID', sa.UUID(), nullable=False),
     sa.Column('Email', sa.String(length=255), nullable=False),
-    sa.Column('PasswordHash', sa.String(length=255), nullable=False),
     sa.Column('Address', sa.String(length=255), nullable=True),
     sa.Column('PhoneNumber', sa.String(length=20), nullable=True),
-    sa.Column('FirstName', sa.String(length=255), nullable=False),
-    sa.Column('LastName', sa.String(length=255), nullable=False),
+    sa.Column('FirstName', sa.String(length=255), nullable=True),
+    sa.Column('LastName', sa.String(length=255), nullable=True),
+    sa.Column('OTP', sa.String(length=6), nullable=True),
+    sa.Column('otp_expiry', sa.Integer(), nullable=True),
+    sa.Column('last_login', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('UserID')
     )
     op.create_table('events',
@@ -47,8 +49,9 @@ def upgrade():
     sa.Column('Description', sa.Text(), nullable=True),
     sa.Column('LocationID', sa.UUID(), nullable=False),
     sa.Column('DateTime', sa.DateTime(), nullable=False),
-    sa.Column('EndTime', sa.DateTime(), nullable=False),
+    sa.Column('EndTime', sa.DateTime(), nullable=True),
     sa.Column('OrganizerID', sa.UUID(), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['LocationID'], ['locations.LocationID'], ),
     sa.ForeignKeyConstraint(['OrganizerID'], ['organizers.OrganizerID'], ),
     sa.PrimaryKeyConstraint('EventID')
@@ -63,13 +66,11 @@ def upgrade():
     )
     op.create_table('tickets',
     sa.Column('TicketID', sa.UUID(), nullable=False),
-    sa.Column('EventID', sa.UUID(), nullable=True),
     sa.Column('UserID', sa.UUID(), nullable=True),
     sa.Column('SeatNumber', sa.String(length=255), nullable=True),
     sa.Column('initialPrice', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('Price', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('Status', sa.Enum('Available', 'Sold', 'ListedonMarketplace', 'Admitted', name='Status'), nullable=True),
-    sa.ForeignKeyConstraint(['EventID'], ['events.EventID'], ),
     sa.ForeignKeyConstraint(['UserID'], ['users.UserID'], ),
     sa.PrimaryKeyConstraint('TicketID')
     )
@@ -86,12 +87,14 @@ def upgrade():
     op.create_table('transactions',
     sa.Column('TransactionID', sa.UUID(), nullable=False),
     sa.Column('TicketID', sa.UUID(), nullable=True),
+    sa.Column('EventID', sa.UUID(), nullable=True),
     sa.Column('BuyerID', sa.UUID(), nullable=True),
     sa.Column('SellerID', sa.UUID(), nullable=True),
     sa.Column('PaymentMethodID', sa.UUID(), nullable=True),
     sa.Column('TransactionAmount', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('TransactionDate', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['BuyerID'], ['users.UserID'], ),
+    sa.ForeignKeyConstraint(['EventID'], ['events.EventID'], ),
     sa.ForeignKeyConstraint(['PaymentMethodID'], ['paymentmethods.PaymentMethodID'], ),
     sa.ForeignKeyConstraint(['SellerID'], ['users.UserID'], ),
     sa.ForeignKeyConstraint(['TicketID'], ['tickets.TicketID'], ),

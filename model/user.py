@@ -12,13 +12,15 @@ class User(db.Model):
     LastName = db.Column(db.String(255), nullable=True)
     OTP = db.Column(db.String(6), nullable=True)  # Assuming OTPs are 6 digits
     otp_expiry = db.Column(db.Integer, nullable=True)
-    # Create last login, update with access token
-
+    last_login = db.Column(db.DateTime, nullable=True)  # Add last login column
+    
     # Relationships
-    tickets = db.relationship('Ticket', backref='user', lazy=True) # This is a one-to-many relationship, eg a user can have many tickets
-    transactions_as_buyer = db.relationship('Transaction', foreign_keys='Transaction.BuyerID', backref='buyer', lazy=True) # This is a one-to-many relationship, eg a user can have many transactions as a buyer
-    transactions_as_seller = db.relationship('Transaction', foreign_keys='Transaction.SellerID', backref='seller', lazy=True)   # This is a one-to-many relationship, eg a user can have many transactions as a seller
-    payment_methods = db.relationship('PaymentMethod', backref='user', lazy=True)   # This is a one-to-many relationship, eg a user can have many payment methods
+    tickets = db.relationship('Ticket', backref='user_tickets', lazy=True) # This is a one-to-many relationship, eg a user can have many tickets
+    transactions_as_buyer = db.relationship('Transaction', foreign_keys='Transaction.BuyerID', backref='user_buyer', lazy=True) # This is a one-to-many relationship, eg a user can have many transactions as a buyer
+    transactions_as_seller = db.relationship('Transaction', foreign_keys='Transaction.SellerID', backref='user_seller', lazy=True)   # This is a one-to-many relationship, eg a user can have many transactions as a seller
+    paymentmethods = db.relationship('PaymentMethod', back_populates='users', lazy=True)   # This is a one-to-many relationship, eg a user can have many payment methods
+    # payment_methods = db.relationship('PaymentMethod', backref='users', lazy=True)   # This is a one-to-many relationship, eg a user can have many payment methods
+    selling_listings = db.relationship('MarketplaceListing', back_populates='sellers')
 
     def to_dict(self):
         return {

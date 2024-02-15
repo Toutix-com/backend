@@ -6,16 +6,18 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
     TransactionID = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     TicketID = db.Column(UUID(as_uuid=True), db.ForeignKey('tickets.TicketID'))
+    EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'))
     BuyerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
     SellerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
     PaymentMethodID = db.Column(UUID(as_uuid=True), db.ForeignKey('paymentmethods.PaymentMethodID'))
     TransactionAmount = db.Column(db.Numeric(10, 2))
     TransactionDate = db.Column(db.DateTime)
 
-    ticket = db.relationship('Ticket', back_populates='transactions')
+    tickets = db.relationship('Ticket', back_populates='transactions')
     buyer = db.relationship('User', foreign_keys=[BuyerID], back_populates='transactions_as_buyer')
     seller = db.relationship('User', foreign_keys=[SellerID], back_populates='transactions_as_seller')
-    payment_method = db.relationship('PaymentMethod', back_populates='transactions')
+    paymentmethods = db.relationship('PaymentMethod', back_populates='transactions')
+    events = db.relationship('Event', back_populates='transactions')
 
     def to_dict(self):
         """Serialize transaction to a dict for easier JSON output."""

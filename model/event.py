@@ -16,26 +16,23 @@ class Event(db.Model):
     OrganizerID = db.Column(UUID(as_uuid=True), db.ForeignKey('organizers.OrganizerID'), nullable=False)
     image_url = db.Column(db.String(255), nullable=True)
 
-
     # Relationships
-    location = db.relationship('Location', backref='event', lazy=True) # This is a one-to-one relationship, eg an event has one location
-    tickets = db.relationship('Ticket', backref='event', lazy=True) # This is a one-to-many relationship, eg an event can have many tickets
-    organizer = db.relationship('Organizer', backref='event', lazy=True) # This is a one-to-one relationship, eg an event has one organizer
-    transactions = db.relationship('Transaction', backref='event', lazy=True) # This is a one-to-many relationship, eg an event can have many transactions
-    marketplace_listings = db.relationship('MarketplaceListing', back_populates='event') # This is a one-to-many relationship, eg an event can have many marketplace listing
-    
+    location = db.relationship('Location', back_populates='events', lazy=True) # This is a one-to-one relationship, eg an event has one location
+    organizer = db.relationship('Organizer', back_populates='events', lazy=True) # This is a one-to-one relationship, eg an event has one organizer
+    marketplace_listings = db.relationship('MarketplaceListing', back_populates='events') # This is a one-to-many relationship, eg an event can have many marketplace listing
+    transactions = db.relationship('Transaction', back_populates='events') # This is a one-to-many relationship, eg an event can have many transactions
     
     def to_dict(self):
-    return {
-        'EventID': str(self.EventID),  # Convert UUID to string for JSON compatibility
-        'Name': self.Name,
-        'Description': self.Description,
-        'image_url': self.image_url,
-        'DateTime': self.DateTime.isoformat() if self.DateTime else None,  # Convert to ISO 8601 string
-        'EndTime': self.EndTime.isoformat() if self.EndTime else None,  # Convert to ISO 8601 string
-        'location': self.location.to_dict() if self.location else None,
-        'starting_price': db.session.query(func.min(Ticket.Price)).filter(Ticket.EventID == self.EventID).scalar(),
-        'max_tickets_per_user': 4,  # Replace with the other value if neccesary
-        'remaining_tickets': Ticket.query.filter_by(EventID=self.EventID, Status='Available').count(),
-        'total_tickets': Ticket.query.filter_by(EventID=self.EventID).count(),
-    }
+      return {
+          'EventID': str(self.EventID),  # Convert UUID to string for JSON compatibility
+          'Name': self.Name,
+          'Description': self.Description,
+          'image_url': self.image_url,
+          'DateTime': self.DateTime.isoformat() if self.DateTime else None,  # Convert to ISO 8601 string
+          'EndTime': self.EndTime.isoformat() if self.EndTime else None,  # Convert to ISO 8601 string
+          'location': self.location.to_dict() if self.location else None,
+          'starting_price': min(ticket.Price for ticket in self.tickets) if self.tickets else None, #self.tickets is a list of all tickets associated with the event.
+          'max_tickets_per_user': 4,  # Replace with the other value if neccesary
+          'remaining_tickets': len([ticket for ticket in self.tickets if ticket.Status == 'Available']),
+          'total_tickets': len(self.tickets),
+      }

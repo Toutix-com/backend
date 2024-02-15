@@ -9,14 +9,13 @@ class Location(db.Model):
     Address = db.Column(db.String(255))
     Capacity = db.Column(db.Integer)
 
-    # Relationships
-    events = db.relationship('Event', back_populates='location')
+    events = db.relationship('Event', back_populates='location', lazy=True)  # This is a one-to-many relationship, eg a location can host many events
 
     def to_dict(self):
-    return {
-        'LocationID': str(self.LocationID),  # Convert UUID to string for JSON compatibility
-        'Name': self.Name,
-        'Address': self.Address,
-        'Capacity': self.Capacity,
-        'events': [event.to_dict() for event in self.events] if self.events else [],
-    }
+        return {
+            'LocationID': str(self.LocationID),  # Convert UUID to string for JSON compatibility
+            'Name': self.Name,
+            'Address': self.Address,
+            'Capacity': self.Capacity,
+            'events': [event.to_dict() for event in self.events] if self.events else [],
+        }

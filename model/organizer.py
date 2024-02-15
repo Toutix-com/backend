@@ -11,9 +11,10 @@ class Organizer(db.Model):
     events = db.relationship('Event', back_populates='organizer')
 
     def to_dict(self):
-    return {
-        'OrganizerID': str(self.OrganizerID), 
-        'Name': self.Name,
-        'ContactInfo': self.ContactInfo,
-        'events': [event.to_dict() for event in self.events] if self.events else [],
-    }
+        return {
+            'OrganizerID': str(self.OrganizerID), 
+            'Name': self.Name,
+            'ContactInfo': self.ContactInfo,
+            'events': [event.to_dict() for event in self.events] if self.events else [],
+        }
+
