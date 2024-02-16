@@ -1,1 +1,1 @@
-web: gunicorn __init__:app
+web: env FLASK_APP=__init__ gunicorn __init__:app
