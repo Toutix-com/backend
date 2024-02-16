@@ -5,12 +5,14 @@ from flask_migrate import Migrate
 from .model import db
 from flask_login import LoginManager
 from .api import api
+from .config import Config
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '312559'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost:5432/new_trial'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SECRET_KEY'] = '312559'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost:5432/new_trial'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_ECHO'] = True
+app.config.from_object(Config)
 app.debug = True
 app.register_blueprint(api, url_prefix='/api')
 db.init_app(app)
