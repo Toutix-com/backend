@@ -1,1 +1,1 @@
-web: env FLASK_APP=__init__ gunicorn __init__:app
+web: flaks db upgrade gunicorn app:app
