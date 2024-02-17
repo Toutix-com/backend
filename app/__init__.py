@@ -2,10 +2,10 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
-from .model import db
+from app.model import db
 from flask_login import LoginManager
-from .api import api
-from .config import Config
+from app.api import api
+from app.config import Config
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = '312559'

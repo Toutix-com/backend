@@ -3,7 +3,7 @@ import random
 import time
 import string
 from datetime import datetime, timezone
-from ..model import User, db
+from app.model import User, db
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
