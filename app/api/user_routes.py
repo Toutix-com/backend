@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required
 from datetime import datetime
 from app.model import User, Ticket, Event, db
-from auth import token_required
+from app.api.auth import token_required
 
 user_routes = Blueprint('user', __name__)
 

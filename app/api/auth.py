@@ -3,7 +3,6 @@ from flask import Blueprint, request, jsonify
 from app.model import User, db
 from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
-from app import jwts
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 #write blueprint
