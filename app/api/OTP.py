@@ -43,7 +43,7 @@ class OTPManager:
             "otp": self.otp
         })
     
-    def generate_access_token(self, identity, expires_delta=timedelta(minutes=15)):
+    def generate_access_token(self, identity, expires_delta=timedelta(hours=2)):
         access_token = create_access_token(identity=identity, expires_delta=expires_delta)
         return access_token
     
@@ -58,6 +58,11 @@ class OTPManager:
         current_time = int(time.time())
         if user.OTP == input_otp and current_time < user.otp_expiry:
             access_token = self.generate_access_token(identity=self.email)
+
+            # Store the access token in the user's record
+            user.Token = access_token
+            db.session.commit()
+
             return jsonify({
                 "message": f"OTP verified successfully for {self.email}",
                 "email": self.email,
