@@ -4,7 +4,7 @@ from sqlalchemy import or_
 
 event_routes = Blueprint('events', __name__)
 
-@event_routes.route('/events', methods=['GET'])
+@event_routes.route('/', methods=['GET'])
 def get_events():
   query = request.args.get('query')
 
@@ -17,20 +17,20 @@ def get_events():
   else:
     events = Event.query.all()
 
-  formatted_events = {str(event.EventID): event.to_dict() for event in events}
-  return jsonify(formatted_events)
+  formatted_events = [event.to_dict() for event in events]
+  return jsonify({"events":formatted_events})
 
-@event_routes.route('/events/<event_id>', methods=['GET'])
+@event_routes.route('/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
   event = Event.query.filter_by(EventID=event_id).first()
 
   if event:
     formatted_event = event.to_dict()
-    return jsonify(formatted_event)
+    return jsonify({'event':formatted_event}),200
   else:
     return jsonify({'message': 'Event not found'}), 404
 
-@event_routes.route('/events/host', methods=['POST'])
+@event_routes.route('/create', methods=['POST'])
 def create_event():
     data = request.get_json()
 
@@ -52,7 +52,40 @@ def create_event():
 
     return jsonify(new_event.to_dict()), 201
 
-@event_routes.route('events/<event_id>', methods=['DELETE'])
+@event_routes.route('/edit', methods=['PUT'])
+def update_event():
+    data = request.get_json()
+
+    if 'EventID' not in data:
+        return jsonify({'message': 'EventID is required'}), 400
+
+    event_id = data['EventID']
+    event = Event.query.get(event_id)
+
+    if not event:
+        return jsonify({'message': 'Event not found'}), 404
+
+    # Update event attributes if they exist in the request data
+    if 'Name' in data:
+        event.Name = data['Name']
+    if 'Description' in data:
+        event.Description = data['Description']
+    if 'DateTime' in data:
+        event.DateTime = data['DateTime']
+    if 'EndTime' in data:
+        event.EndTime = data['EndTime']
+    if 'LocationID' in data:
+        event.LocationID = data['LocationID']
+    if 'OrganizerID' in data:
+        event.OrganizerID = data['OrganizerID']
+    if 'image_url' in data:
+        event.image_url = data['image_url']
+
+    db.session.commit()
+
+    return jsonify(event.to_dict()), 200
+
+@event_routes.route('/<event_id>', methods=['DELETE'])
 def delete_event(event_id):
     event = Event.query.filter_by(EventID=event_id).first()
 
