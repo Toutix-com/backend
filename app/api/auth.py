@@ -29,9 +29,9 @@ def login():
     otp_manager = OTPManager(email)
     otp_manager.generate_store_otp()
     if otp_manager.send_otp():
-        return jsonify({"message": "OTP sent. Please check your email."}), 200
+        return otp_manager.send_otp(), 200
     else:
-        return jsonify({"error": "Failed to send OTP."}), 500
+        return jsonify({"error": "Failed to send OTP."}), 400
 
 @auth_routes.route('/validateOTP', methods=['POST'])
 def validate_otp():
@@ -42,12 +42,34 @@ def validate_otp():
         return jsonify({"error": "Both email and OTP are required."}), 400
 
     otp_manager = OTPManager(email)
-    if otp_manager.validate_otp(otp):
-        user = User.query.filter_by(Email= email).first()
-        login_user(user)
-        return jsonify({"message": "You are logged in."}), 200
-    else:
+    if not otp_manager.validate_otp(otp):
         return jsonify({"error": "Invalid OTP or OTP expired."}), 400
+
+    user = User.query.filter_by(Email=email).first()
+    if not user:
+        return jsonify({"error": "Invalid User."}), 400
+
+    # Update last login time to current datetime
+    user.last_login = datetime.utcnow()
+
+    # Determine if it's the user's first login
+    first_time_login = user.last_login is None
+
+    # Get access token
+    access_token = user.Token
+
+    # Update last_login in the database
+    db.session.commit()
+
+    login_user(user)
+
+    # Return access token, email, and first_time_login boolean
+    return jsonify({
+        "access_token": access_token,
+        "email": user.Email,
+        "first_time_login": first_time_login,
+        "message": "You are logged in."
+    }), 200
 
 @auth_routes.route('/unauthorized')
 def unauthorized():
