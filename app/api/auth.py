@@ -43,7 +43,7 @@ def validate_otp():
 
     otp_manager = OTPManager(email)
     if otp_manager.validate_otp(otp):
-        user = User.query.filter_by(email= email).first()
+        user = User.query.filter_by(Email= email).first()
         login_user(user)
         return jsonify({"message": "You are logged in."}), 200
     else:

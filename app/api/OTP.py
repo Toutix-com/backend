@@ -21,12 +21,12 @@ class OTPManager:
         self.otp = ''.join(random.choice(digits) for i in range(length))
         self.expiry = int(time.time()) + 300
         # Store OTP
-        user = User.query.filter_by(email=self.email).first()
+        user = User.query.filter_by(Email=self.email).first()
         if user:
             user.OTP = self.otp
             user.otp_expiry = self.expiry
         else:
-            user = User(email=self.email, OTP=self.otp, otp_expiry=self.expiry)
+            user = User(Email=self.email, OTP=self.otp, otp_expiry=self.expiry)
             db.session.add(user)
 
         db.session.commit()
@@ -48,7 +48,7 @@ class OTPManager:
         return access_token
     
     def validate_otp(self, input_otp):
-        user = User.query.filter_by(email=self.email).first()
+        user = User.query.filter_by(Email=self.email).first()
 
         # Check if the user exists
         if not user:

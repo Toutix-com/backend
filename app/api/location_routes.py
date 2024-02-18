@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from app.model import Location
-from sqlalchemy import or_, db
+from app.model import Location, db
+from sqlalchemy import or_
 
 location_routes = Blueprint('locations', __name__)
 
