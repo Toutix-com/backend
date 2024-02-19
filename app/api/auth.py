@@ -4,6 +4,7 @@ from app.model import User, db
 from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import datetime
 
 #write blueprint
 auth_routes = Blueprint('auth', __name__)
@@ -61,7 +62,7 @@ def validate_otp():
     # Update last_login in the database
     db.session.commit()
 
-    login_user(user)
+    login_user(user, force=True)
 
     # Return access token, email, and first_time_login boolean
     return jsonify({

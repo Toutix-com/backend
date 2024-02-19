@@ -35,6 +35,9 @@ class User(db.Model):
             #'transactions_as_buyer': [transaction.to_dict() for transaction in self.transactions_as_buyer] if self.transactions_as_buyer else [],
             #'transactions_as_seller': [transaction.to_dict() for transaction in self.transactions_as_seller] if self.transactions_as_seller else [],
         }
+    
+    def get_id(self):
+        return self.UserID
 
 
 
