@@ -52,7 +52,7 @@ def create_event():
 
     return jsonify(new_event.to_dict()), 201
 
-@event_routes.route('/edit', methods=['PUT'])
+@event_routes.route('/update', methods=['PUT'])
 def update_event():
     data = request.get_json()
 

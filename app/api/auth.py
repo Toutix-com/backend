@@ -5,6 +5,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
+import time
 
 #write blueprint
 auth_routes = Blueprint('auth', __name__)
@@ -41,12 +42,15 @@ def validate_otp():
     otp = data.get('otp')
     if not email or not otp:
         return jsonify({"error": "Both email and OTP are required."}), 400
-
+    
+    user = User.query.filter_by(Email=email).first()
+    if otp != user.OTP or int(time.time()) > user.otp_expiry:
+        return jsonify({"error": "Invalid OTP or OTP expired."}), 400
+    
     otp_manager = OTPManager(email)
     if not otp_manager.validate_otp(otp):
         return jsonify({"error": "Invalid OTP or OTP expired."}), 400
 
-    user = User.query.filter_by(Email=email).first()
     if not user:
         return jsonify({"error": "Invalid User."}), 400
 

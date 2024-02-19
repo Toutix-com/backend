@@ -16,10 +16,12 @@ class Ticket(db.Model):
     initialPrice = db.Column(db.Numeric(10, 2))
     Price = db.Column(db.Numeric(10, 2))
     Status = db.Column(db.Enum(StatusEnum,name='Status'))
+    EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'))
 
     user = db.relationship('User', back_populates='tickets')
     transactions = db.relationship('Transaction', back_populates='tickets')
     marketplace_listings = db.relationship('MarketplaceListing', back_populates='tickets')
+    event = db.relationship('Event', back_populates='tickets', lazy=True)
 
     def to_dict(self):
         return {

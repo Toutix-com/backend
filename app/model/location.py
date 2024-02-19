@@ -13,9 +13,12 @@ class Location(db.Model):
 
     def to_dict(self):
         return {
-            'LocationID': str(self.LocationID),  # Convert UUID to string for JSON compatibility
+            'LocationID': str(self.LocationID),
             'Name': self.Name,
             'Address': self.Address,
             'Capacity': self.Capacity,
-            'events': [event.to_dict() for event in self.events] if self.events else [],
+            # 'events': removed to prevent recursion
         }
+        '''if include_events:
+            location_dict['events'] = [event.to_dict(include_location=False) for event in self.events] if self.events else []
+        return location_dict'''

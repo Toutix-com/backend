@@ -21,7 +21,8 @@ class Event(db.Model):
     organizer = db.relationship('Organizer', back_populates='events', lazy=True) # This is a one-to-one relationship, eg an event has one organizer
     marketplace_listings = db.relationship('MarketplaceListing', back_populates='events') # This is a one-to-many relationship, eg an event can have many marketplace listing
     transactions = db.relationship('Transaction', back_populates='events') # This is a one-to-many relationship, eg an event can have many transactions
-    
+    tickets = db.relationship('Ticket', back_populates='event', lazy=True)
+
     def to_dict(self):
       return {
           'EventID': str(self.EventID),  # Convert UUID to string for JSON compatibility
