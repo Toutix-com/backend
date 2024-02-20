@@ -3,8 +3,10 @@ from flask_login import login_required
 from datetime import datetime
 from app.model import User, Ticket, Event, db
 from app.api.auth import token_required
+from flask_cors import CORS
 
 user_routes = Blueprint('users', __name__)
+CORS(user_routes, resources={r"/*": {"origins": "*"}})
 
 @user_routes.route('/')
 def get_users():

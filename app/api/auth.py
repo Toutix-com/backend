@@ -6,9 +6,12 @@ from functools import wraps
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 import time
+from flask_cors import CORS
 
 #write blueprint
 auth_routes = Blueprint('auth', __name__)
+
+CORS(auth_routes, resources={r"/*": {"origins": "*"}})
 
 def token_required(f):
     @wraps(f)
