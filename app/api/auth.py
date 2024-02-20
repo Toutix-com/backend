@@ -69,6 +69,7 @@ def validate_otp():
         "access_token": access_token,
         "email": user.Email,
         "first_time_login": first_time_login,
+        "user_id": user.UserID,
         "message": "You are logged in."
     }), 200
 
