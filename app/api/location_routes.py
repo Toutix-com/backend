@@ -48,7 +48,7 @@ def create_location():
 
   return jsonify(new_location.to_dict()), 201
 
-@location_routes.route('/create', methods=['PUT'])
+@location_routes.route('/update', methods=['PUT'])
 def update_location():
     data = request.get_json()
 

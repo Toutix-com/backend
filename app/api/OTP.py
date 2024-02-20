@@ -37,6 +37,21 @@ class OTPManager:
         # Return json message to frontend
         self.otp, self.expiry = self.generate_store_otp()
         expiry_iso = datetime.fromtimestamp(self.expiry, timezone.utc).isoformat()
+        '''
+         smtp_server = smtplib.SMTP('smtp.example.com', 587)  # replace with your SMTP server details
+        smtp_server.starttls()
+        smtp_server.login('username', 'password')  # replace with your SMTP server credentials
+
+        # Create the email
+        msg = MIMEText(f'Your OTP is {self.otp} and it expires at {expiry_iso}')
+        msg['Subject'] = 'Your OTP'
+        msg['From'] = 'sender@example.com'  # replace with your email
+        msg['To'] = self.email
+
+        # Send the email
+        smtp_server.send_message(msg)
+
+        smtp_server.quit()'''
         return jsonify({
             "message": f"OTP sent successfully to {self.email}",
             "otp_expiry": expiry_iso,
