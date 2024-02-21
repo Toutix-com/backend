@@ -1,10 +1,9 @@
 from flask import Blueprint, jsonify, request
 from app.model import Location, db
 from sqlalchemy import or_
-from flask_cors import CORS
+
 
 location_routes = Blueprint('locations', __name__)
-CORS(location_routes, resources={r"/*": {"origins": "*"}})
 
 @location_routes.route('/', methods=['GET'])
 def get_locations():

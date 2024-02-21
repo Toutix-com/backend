@@ -1,10 +1,8 @@
 from flask import Blueprint, jsonify, request
 from app.model import Event, Location,db
 from sqlalchemy import or_
-from flask_cors import CORS
 
 event_routes = Blueprint('events', __name__)
-CORS(event_routes, resources={r"/*": {"origins": "*"}})
 
 @event_routes.route('/', methods=['GET'])
 def get_events():

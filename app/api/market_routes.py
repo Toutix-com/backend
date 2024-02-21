@@ -1,10 +1,8 @@
 from flask import Blueprint, jsonify, request
 from app.model import Market, db
 from sqlalchemy import or_
-from flask_cors import CORS
 
 market_routes = Blueprint('markets', __name__)
-CORS(market_routes, resources={r"/*": {"origins": "*"}})
 
 @market_routes.route('/', methods=['GET'])
 def get_markets():

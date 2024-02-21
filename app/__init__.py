@@ -6,9 +6,11 @@ from app.model import db
 from flask_login import LoginManager
 from app.api import api
 from app.config import Config
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 # app.config['SECRET_KEY'] = '312559'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost:5432/new_trial'
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
