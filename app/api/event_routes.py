@@ -36,6 +36,11 @@ def create_event():
 
     if 'Name' not in data or 'DateTime' not in data or 'LocationID' not in data or 'OrganizerID' not in data:
         return jsonify({'message': 'Missing required fields'}), 400
+    
+    # Check if an event with the same Name, DateTime, EndTime, and LocationID already exists
+    existing_event = Event.query.filter_by(Name=data['Name'], DateTime=data['DateTime'], EndTime=data.get('EndTime'), LocationID=data['LocationID']).first()
+    if existing_event:
+        return jsonify({'message': 'An event with the same details already exists'}), 400
 
     new_event = Event(
         Name=data['Name'],
@@ -44,7 +49,8 @@ def create_event():
         EndTime=data.get('EndTime'),
         LocationID=data['LocationID'],
         OrganizerID=data['OrganizerID'],
-        image_url=data.get('image_url')
+        image_url=data.get('image_url'),
+        EntryRequirement=data.get('EntryRequirement')
     )
 
     db.session.add(new_event)

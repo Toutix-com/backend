@@ -13,7 +13,8 @@ class User(db.Model):
     OTP = db.Column(db.String(6), nullable=True)  # Assuming OTPs are 6 digits
     otp_expiry = db.Column(db.Integer, nullable=True)
     last_login = db.Column(db.DateTime, nullable=True)
-    Token = db.Column(db.String(500), nullable=True) 
+    Token = db.Column(db.String(500), nullable=True)
+    Birthday = db.Column(db.Date, nullable=True)
     
     # Relationships
     tickets = db.relationship('Ticket', backref='user_tickets', lazy=True) # This is a one-to-many relationship, eg a user can have many tickets

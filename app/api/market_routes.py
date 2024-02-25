@@ -1,33 +1,46 @@
 from flask import Blueprint, jsonify, request
-from app.model import Market, db
+from app.model import MarketplaceListing, Event, db
 from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 
 market_routes = Blueprint('markets', __name__)
 
+
 @market_routes.route('/', methods=['GET'])
 def get_markets():
-  query = request.args.get('query')
+    query = request.args.get('query')
+    location = request.args.get('location')
+    events = request.args.get('events')
 
-  if query:
-    markets = Market.query.filter(
-      or_(
-        Market.Name.ilike(f'%{query}%'),
-      )
-    ).all()
-  else:
-    markets = Market.query.all()
+    if query:
+        marketplacelistings = MarketplaceListing.query.options(joinedload('events')).filter(
+            or_(
+                MarketplaceListing.name.ilike(f'%{query}%'),
+                Event.location.ilike(f'%{query}%'),
+                Event.event_name.ilike(f'%{query}%')
+            )
+        ).all()
+    elif location:
+        marketplacelistings = MarketplaceListing.query.options(joinedload('events')).filter(
+            Event.location.ilike(f'%{location}%')
+        ).all()
+    elif events:
+        marketplacelistings = MarketplaceListing.query.options(joinedload('events')).filter(
+            Event.event_name.ilike(f'%{events}%')
+        ).all()
+    else:
+        marketplacelistings = MarketplaceListing.query.options(joinedload('events')).all()
 
-  formatted_markets = [market.to_dict() for market in markets]
-  return jsonify({'markets':formatted_markets})
+    return jsonify([marketplacelisting.to_dict() for marketplacelisting in marketplacelistings])
 
 
 @market_routes.route('/<market_id>', methods=['GET'])
 def get_market_by_id(market_id):
-  market = Market.query.filter_by(MarketID=market_id).first()
+    market = Market.query.filter_by(ListingID=market_id).first()
 
-  if market:
-    formatted_market = market.to_dict()
-    return jsonify({'market':formatted_market})
-  else:
-    return jsonify({'message': 'Market not found'}), 404
+    if market:
+        formatted_market = market.to_dict()
+        return jsonify({'market':formatted_market})
+    else:
+        return jsonify({'message': 'Market not found'}), 404
   

@@ -53,12 +53,12 @@ def validate_otp():
 
     if not user:
         return jsonify({"error": "Invalid User."}), 400
+    
+    # Determine if it's the user's first login
+    first_time_login = user.last_login is None
 
     # Update last login time to current datetime
     user.last_login = datetime.utcnow()
-
-    # Determine if it's the user's first login
-    first_time_login = user.last_login is None
 
     # Get access token
     access_token = user.Token
@@ -68,13 +68,18 @@ def validate_otp():
 
     login_user(user, force=True)
 
+    first_name = user.FirstName
+    last_name = user.LastName
+
     # Return access token, email, and first_time_login boolean
     return jsonify({
         "access_token": access_token,
         "email": user.Email,
         "first_time_login": first_time_login,
         "user_id": user.UserID,
-        "message": "You are logged in."
+        "message": "You are logged in.",
+        "first_name": first_name,
+        "last_name": last_name  
     }), 200
 
 @auth_routes.route('/unauthorized')

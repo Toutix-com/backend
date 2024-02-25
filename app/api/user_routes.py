@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 from datetime import datetime
-from app.model import User, Ticket, Event, db
+from app.model import User, Ticket, Event, db, Transaction
 from app.api.auth import token_required
 
 user_routes = Blueprint('users', __name__)
@@ -33,23 +33,27 @@ def get_ticket_by_ids(user_id, ticket_id):
     else:
         return jsonify({'error': 'Ticket not found'}), 404
 
-@user_routes.route('/<string:user_id>/tickets', methods=['POST'])
-@token_required
-def create_ticket(user_id):
+@user_routes.route('/<user_id>/update', methods=['PUT'])
+def edit_user(user_id):
+    user = User.query.get(UUID(user_id))
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
     data = request.get_json()
-    event_id = data.get('event_id')
-    quantity = data.get('quantity')
-    date = datetime.now()
-    event = Event.query.get(event_id)
+    if 'Address' in data:
+        user.Address = data['Address']
+    if 'PhoneNumber' in data:
+        user.PhoneNumber = data['PhoneNumber']
+    if 'FirstName' in data:
+        user.FirstName = data['FirstName']
+    if 'LastName' in data:
+        user.LastName = data['LastName']
+    if 'Birthday' in data:
+        user.Birthday = datetime.strptime(data['Birthday'], '%Y-%m-%d').date()
 
-    if event is not None:
-        ticket = Ticket(user_id=user_id, event_id=event_id, quantity=quantity, purchase_date=date)
-        db.session.add(ticket)
-        db.session.commit()
+    db.session.commit()
 
-        return ticket.to_dict()
-    else:
-        return jsonify({'error': 'Event not found'}), 404
+    return jsonify({'message': 'User updated successfully'}), 200
 
 @user_routes.route('/<string:user_id>/tickets/<string:ticket_id>', methods=['DELETE'])
 @token_required

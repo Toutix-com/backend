@@ -6,7 +6,8 @@ from app.config import STRIPE_SECRET_KEY
 
 payment_routes = Blueprint('payment', __name__)
 
-stripe.api_key = STRIPE_SECRET_KEY
+# Store in .env file
+stripe.api_key = sk_test_51OjNO1L6oeMlaoGUMj1e7MmK3xoLsj2Gpiaxd1m2xD4KClB6VmfJKxLWtyWuNsjEheUUiKWfN8MlVjyX2UZQ9Ghe00WuZkpqgX
 
 @payment_routes.route('/intent/events/ticket', methods=['POST'])
 @jwt_required
@@ -30,23 +31,28 @@ def charge():
         amount = ticket_category.price * number_of_tickets
         currency = 'usd'  # Assuming currency is USD
 
+        # Calculate service fee
+        service = amount * 0.1
+        total_amount = amount + service
+
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=amount,
+            amount=total_amount,
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
             },
             metadata={
                 'userID': user.id,
-                'userEmail': user.email,
                 'eventID': event.id,
-                'eventName': event.name,
                 'ticketCategoryID': ticket_category.id,
                 'ticketCategoryName': ticket_category.name,
-                'numberOfTickets': number_of_tickets
-                'purchaseType': 'event-tickets'
-                # Add any other relevant information here
+                'numberOfTickets': number_of_tickets,
+                'purchaseType': 'event-tickets',
+                'quantity': number_of_tickets,
+                'transactionAmount': total_amount,
+                'category': ticket_category.name,
+                'initialPrice': ticket_category.price
             }
         )
 
@@ -59,7 +65,7 @@ def charge():
         return jsonify({"error": str(e)}), 400
 
 
-@payment_routes.route('/intent/events/marketplace', methods=['POST'])
+@payment_routes.route('/intent/marketplace/ticket', methods=['POST'])
 @jwt_required
 def charge():
     data = request.json
@@ -136,3 +142,4 @@ def stripe_webhook():
     
     # Respond to the event
     return '', 200
+

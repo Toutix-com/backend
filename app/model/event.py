@@ -15,6 +15,7 @@ class Event(db.Model):
     EndTime = db.Column(db.DateTime, nullable=True)
     OrganizerID = db.Column(UUID(as_uuid=True), db.ForeignKey('organizers.OrganizerID'), nullable=False)
     image_url = db.Column(db.String(255), nullable=True)
+    EntryRequirement = db.Column(db.String(255), nullable=True)
 
     # Relationships
     location = db.relationship('Location', back_populates='events', lazy=True) # This is a one-to-one relationship, eg an event has one location
@@ -32,8 +33,6 @@ class Event(db.Model):
           'DateTime': self.DateTime.isoformat() if self.DateTime else None,  # Convert to ISO 8601 string
           'EndTime': self.EndTime.isoformat() if self.EndTime else None,  # Convert to ISO 8601 string
           'location': self.location.to_dict() if self.location else None,
-          'starting_price': min(ticket.Price for ticket in self.tickets) if self.tickets else None, #self.tickets is a list of all tickets associated with the event.
-          'max_tickets_per_user': 4,  # Replace with the other value if neccesary
-          'remaining_tickets': len([ticket for ticket in self.tickets if ticket.Status == 'Available']),
-          'total_tickets': len(self.tickets),
+          'organizer': self.organizer.to_dict() if self.organizer else None,
+          'EntryRequirement': self.EntryRequirement
       }

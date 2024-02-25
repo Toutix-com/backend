@@ -5,7 +5,6 @@ from sqlalchemy.dialects.postgresql import UUID
 class Transaction(db.Model):
     __tablename__ = 'transactions'
     TransactionID = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    TicketID = db.Column(UUID(as_uuid=True), db.ForeignKey('tickets.TicketID'))
     EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'))
     BuyerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
     SellerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
@@ -13,14 +12,13 @@ class Transaction(db.Model):
     TransactionAmount = db.Column(db.Numeric(10, 2))
     TransactionDate = db.Column(db.DateTime)
 
-    tickets = db.relationship('Ticket', back_populates='transactions')
+    tickets = db.relationship('Ticket', backref='transactions', lazy=True)
     buyer = db.relationship('User', foreign_keys=[BuyerID], back_populates='transactions_as_buyer')
     seller = db.relationship('User', foreign_keys=[SellerID], back_populates='transactions_as_seller')
     paymentmethods = db.relationship('PaymentMethod', back_populates='transactions')
     events = db.relationship('Event', back_populates='transactions')
 
     def to_dict(self):
-        """Serialize transaction to a dict for easier JSON output."""
         return {
             'TransactionID': str(self.TransactionID),  # Convert UUID to string for JSON compatibility
             'TicketID': str(self.TicketID),
