@@ -34,6 +34,7 @@ def get_ticket_by_ids(user_id, ticket_id):
         return jsonify({'error': 'Ticket not found'}), 404
 
 @user_routes.route('/<user_id>/update', methods=['PUT'])
+@token_required
 def edit_user(user_id):
     user = User.query.get(UUID(user_id))
     if not user:
@@ -67,3 +68,31 @@ def delete_ticket(user_id, ticket_id):
     db.session.commit()
 
     return jsonify({'message': 'Ticket deleted successfully'})
+
+@user_routes.route('/<string:user_id>/tickets/<string:ticket_id>/list_on_marketplace', methods=['PUT'])
+@token_required
+def list_ticket_on_marketplace(user_id, ticket_id):
+    ticket = Ticket.query.filter_by(id=ticket_id, user_id=user_id).first()
+
+    if ticket is None:
+        return jsonify({'error': 'Ticket not found'}), 404
+
+    ticket.status = 'listedonmarketplace'
+
+    db.session.commit()
+
+    return jsonify({'message': 'Ticket listed on marketplace successfully'}), 200
+
+@user_routes.route('/<string:user_id>/tickets/<string:ticket_id>/delist', methods=['PUT'])
+@token_required
+def delist_ticket(user_id, ticket_id):
+    ticket = Ticket.query.filter_by(id=ticket_id, user_id=user_id).first()
+
+    if ticket is None:
+        return jsonify({'error': 'Ticket not found'}), 404
+
+    ticket.status = 'sold'
+
+    db.session.commit()
+
+    return jsonify({'message': 'Ticket delisted successfully'}), 200

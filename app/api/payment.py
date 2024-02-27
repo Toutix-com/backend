@@ -29,7 +29,7 @@ def charge():
 
         # Calculate the amount based on ticket price and number of tickets
         amount = ticket_category.price * number_of_tickets
-        currency = 'usd'  # Assuming currency is USD
+        currency = 'gbp'  # Assuming currency is USD
 
         # Calculate service fee
         service = amount * 0.1
@@ -45,21 +45,18 @@ def charge():
             metadata={
                 'userID': user.id,
                 'eventID': event.id,
-                'ticketCategoryID': ticket_category.id,
-                'ticketCategoryName': ticket_category.name,
-                'numberOfTickets': number_of_tickets,
                 'purchaseType': 'event-tickets',
                 'quantity': number_of_tickets,
-                'transactionAmount': total_amount,
-                'category': ticket_category.name,
+                'TransactionAmount': total_amount,
+                'CategoryID': ticket_category_id,
                 'initialPrice': ticket_category.price
             }
         )
 
         # Save the Payment Intent ID in the database for future reference
         payment_method = PaymentMethod(PaymentDetails=intent.id)
-        db.session.add(payment_method)
-        db.session.commit()
+        '''db.session.add(payment_method)
+        db.session.commit()'''
         return jsonify({"success": True, "paymentIntent": intent.id , 'clientSecret': intent['client_secret']}), 200
     except stripe.error.StripeError as e:
         return jsonify({"error": str(e)}), 400
@@ -84,10 +81,12 @@ def charge():
         event = Event.query.get(event_id)
         ticket_category = TicketCategory.query.get(ticket_category_id)
         ticket = Ticket.query.get(ticket_id)
-
-        # Calculate the amount based on ticket price and number of tickets
-        amount = ticket_category.price * number_of_tickets
-        currency = 'usd'  # Assuming currency is USD
+        
+        if resale_price <= 2* ticket_category.price:
+            amount = resale_price
+        else:
+            raise ValueError("Resale price cannot be more than double the original price")
+        currency = 'gbp'  # Assuming currency is USD
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
@@ -98,13 +97,12 @@ def charge():
             },
             metadata={
                 'userID': user.id,
+                'sellerID': ticket.user_id, 
                 'userEmail': user.email,
                 'eventID': event.id,
-                'eventName': event.name,
                 'ticketID': ticket_id,
-                'purchaseType': 'marketplace-tickets'
-
-                # Add any other relevant information here
+                'purchaseType': 'marketplace-tickets',
+                'price': resale_price
             }
         )
 
@@ -136,9 +134,28 @@ def stripe_webhook():
     # Handle the event
     if event['type'] == 'payment_intent.succeeded':
         payment_intent = event['data']['object']
-        # Update database based on payment status
-        # For example, update ticket purchase status to 'paid'
-        
+        purchase_type = payment_intent['metadata']['purchaseType']
+
+        if purchase_type == 'event-tickets':
+            ticket_manager = TicketManager(payment_intent['metadata']['userID'])
+            token = ticket_manager.purchase_ticket(
+                payment_intent['metadata']['eventID'], 
+                payment_intent['metadata']['quantity'], 
+                payment_intent['id'], 
+                payment_intent['metadata']['TransactionAmount'], 
+                payment_intent['metadata']['CategoryID'], 
+                payment_intent['metadata']['initialPrice']
+            )
+
+        elif purchase_type == 'marketplace-tickets':
+            ticket_manager = TicketManager(payment_intent['metadata']['userID'])
+            token = ticket_manager.purchase_ticket_marketplace(
+                payment_intent['metadata']['sellerID'],
+                payment_intent['metadata']['eventID'],
+                payment_intent['id'],
+                payment_intent['metadata']['price'],
+                payment_intent['metadata']['ticketID']
+            )
     
     # Respond to the event
     return '', 200

@@ -10,11 +10,12 @@ from datetime import timedelta
 ticket_routes = Blueprint('ticket', __name__)
 
 class TicketManager:
-    def __init__(self, email):
-        self.email = email 
+    def __init__(self, user_id):
+        self.userID = user_id
 
-    def purchase_ticket(self, event_id, quantity, paymentmethod_id, TransactionAmount, category, seller_id=None, initialprice, price=None):
-        user = User.query.filter_by(email=self.email).first()
+    def purchase_ticket(self, event_id, quantity, paymentmethod_id, TransactionAmount, CategoryID, initialprice):
+        user = User.query.get(self.userID)
+        category = ticket_category.query.get(CategoryID)
         if user is None:
             return jsonify({'error': 'User not found'}), 404
 
@@ -24,25 +25,54 @@ class TicketManager:
         if event is None:
             return jsonify({'error': 'Event not found'}), 404
         
-        # If no seller_id is provided, use a default value
-        default_uuid = uuid.UUID('00000000-0000-0000-0000-000000000001')
-        if seller_id is None:
-            seller_id = default_uuid  # Replace with your default value
-
-        # keep sellerid null for now
-        # Remove seat number
-        transaction = Transaction(BuyerID=user.id, SellerID=seller_id, PaymentMethodID=paymentmethod_id, TransactionAmount=TransactionAmount, EventID=event_id, TransactionDate=date)
+        # Add all the data into the transaction table, and then add the tickets into the ticket table
+        # if its a marketplace listing, then there is a sellerID, if not, then there is no sellerID
+        
+        transaction = Transaction(BuyerID= self.userID, PaymentMethodID=paymentmethod_id, TransactionAmount=TransactionAmount, EventID=event_id, TransactionDate=date)
         db.session.add(transaction)
         db.session.flush()
-
-        if price is None:
-            price = initialprice
-
+        
+        # Assuming that there is available tickets in the inventory
         for _ in range(quantity):
-            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=user.id, EventID=event_id, Category=category, Status='Available', Price=price, SeatNumber=seat_number)
+            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, initialprice=initialprice, EventID=event_id, Category=category.name, Status='Available', Price=initialprice, SeatNumber=seat_number)
+            category.ticket_sold += 1
             db.session.add(ticket)
 
         db.session.commit()
+
+        # what do you want to be returned?
+        token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+        print(f"Transaction token: {token}")
+
+        return token
+    
+    def purchase_ticket_marketplace(self, sellerID, event_id, paymentmethod_id, price, ticket_id):
+        user = User.query.get(self.userID)
+        seller = User.query.get(sellerID)
+        ticket = Ticket.query.get(ticket_id)
+        
+        if user is None or seller is None:
+            return jsonify({'error': 'User or seller not found'}), 404
+        
+        if ticket is None:
+            return jsonify({'error': 'Ticket not found'}), 404
+
+        date = datetime.now()
+        event = Event.query.get(event_id)
+
+        if event is None:
+            return jsonify({'error': 'Event not found'}), 404     
+        
+        # keep sellerid null for now
+        transaction = Transaction(BuyerID= self.userID, SellerID=sellerID, PaymentMethodID=paymentmethod_id, TransactionAmount=price, EventID=event_id, TransactionDate=date)
+        db.session.add(transaction)
+        db.session.commit()
+
+        # Modify the ticket to have the new owner and status as sold
+        ticket.UserID = self.userID
+        ticket.Status = 'sold'
+        ticket.price = price
+        ticket.TransactionID = transaction.TransactionID
 
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -59,9 +89,9 @@ class TicketManager:
         if new_owner is None:
             return jsonify({'error': 'New owner not found'}), 404
 
-        ticket.UserID = new_owner.id
+        ticket.UserID = new_owner.UserID
         ticket.Status = 'Sold'
 
         db.session.commit()
 
-        return jsonify({'message': 'Ticket ownership transferred successfully'}), 200
+        return jsonify({'message': 'Ticket ownership transferred successfully'}), 2001

@@ -7,7 +7,7 @@ class Transaction(db.Model):
     TransactionID = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'))
     BuyerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
-    SellerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
+    SellerID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'), nullable=True)
     PaymentMethodID = db.Column(UUID(as_uuid=True), db.ForeignKey('paymentmethods.PaymentMethodID'))
     TransactionAmount = db.Column(db.Numeric(10, 2))
     TransactionDate = db.Column(db.DateTime)

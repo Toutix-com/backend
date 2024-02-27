@@ -13,14 +13,14 @@ class Ticket(db.Model):
     __tablename__ = 'tickets'
     TicketID = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     UserID = db.Column(UUID(as_uuid=True), db.ForeignKey('users.UserID'))
-    SeatNumber = db.Column(db.String(255))
+    SeatNumber = db.Column(db.String(255), nullable=True)
     initialPrice = db.Column(db.Numeric(10, 2))
     Price = db.Column(db.Numeric(10, 2))
     Status = db.Column(db.Enum(StatusEnum,name='Status'))
     EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'))
     TransactionID = db.Column(UUID(as_uuid=True), db.ForeignKey('transactions.TransactionID'))
     Category = db.Column(db.String(255))
-    # Add datetime tracker of ticket creation
+    CreationDate = db.Column(db.DateTime, server_default=db.func.now())
 
     user = db.relationship('User', back_populates='tickets')
     transactions = db.relationship('Transaction', backref='tickets') # Singular, assuming one-to-many from Transaction to Ticket
