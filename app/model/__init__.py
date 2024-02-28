@@ -7,4 +7,4 @@ from .transaction import Transaction
 from .event import Event
 from .payment import PaymentMethod
 from .marketplace import MarketplaceListing
-
+from .ticket_category import TicketCategory

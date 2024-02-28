@@ -101,3 +101,15 @@ def delete_event(event_id):
         return jsonify({'message': 'Event deleted'}), 200
     else:
         return jsonify({'message': 'Event not found'}), 404
+    
+@event_routes.route('/<event_id>/ticket/categories', methods=['GET'])
+def get_event_ticket_categories(event_id):
+    event = Event.query.filter_by(EventID=event_id).first()
+
+    if event:
+        ticket_categories = event.ticket_categories
+        formatted_categories = [category.to_dict() for category in ticket_categories]
+        return jsonify({'ticket_categories':formatted_categories}), 200
+    else:
+        return jsonify({'message': 'Event not found'}), 404
+    

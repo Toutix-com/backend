@@ -10,7 +10,7 @@ class PaymentMethod(db.Model):
     PaymentDetails = db.Column(db.Text)
 
     users = db.relationship('User', back_populates='paymentmethods')
-    transactions = db.relationship('Transaction', back_populates='paymentmethods')
+    #transactions = db.relationship('Transaction', back_populates='paymentmethods')
 
     def to_dict(self):
         return {

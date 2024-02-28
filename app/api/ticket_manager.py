@@ -1,6 +1,5 @@
 from flask import Flask, Blueprint, request, jsonify
 import random
-import time
 import string
 from datetime import datetime, timezone
 from app.model import User, db, Event, Transaction, Ticket
@@ -34,6 +33,10 @@ class TicketManager:
         
         # Assuming that there is available tickets in the inventory
         for _ in range(quantity):
+            if category.ticket_sold >= category.ticket_limit:
+                return {
+            'error': 'Not enough tickets available'
+            }
             ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, initialprice=initialprice, EventID=event_id, Category=category.name, Status='Available', Price=initialprice, SeatNumber=seat_number)
             category.ticket_sold += 1
             db.session.add(ticket)
