@@ -12,7 +12,7 @@ class Transaction(db.Model):
     TransactionAmount = db.Column(db.Numeric(10, 2))
     TransactionDate = db.Column(db.DateTime)
 
-    tickets = db.relationship('Ticket', backref='transactions', lazy=True)
+    tickets = db.relationship('Ticket', back_populates='transactions', lazy=True)
     buyer = db.relationship('User', foreign_keys=[BuyerID], back_populates='transactions_as_buyer')
     seller = db.relationship('User', foreign_keys=[SellerID], back_populates='transactions_as_seller')
     #paymentmethods = db.relationship('PaymentMethod', back_populates='transactions')

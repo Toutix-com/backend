@@ -15,6 +15,6 @@ class Organizer(db.Model):
             'OrganizerID': str(self.OrganizerID), 
             'Name': self.Name,
             'ContactInfo': self.ContactInfo,
-            'events': [event.to_dict() for event in self.events] if self.events else [],
+            # 'events': [event.to_dict() for event in self.events] if self.events else [],
         }
 

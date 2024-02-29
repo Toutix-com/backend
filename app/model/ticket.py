@@ -23,7 +23,7 @@ class Ticket(db.Model):
     CreationDate = db.Column(db.DateTime, server_default=db.func.now())
 
     user = db.relationship('User', back_populates='tickets')
-    transactions = db.relationship('Transaction', backref='tickets') # Singular, assuming one-to-many from Transaction to Ticket
+    transactions = db.relationship('Transaction', back_populates='tickets') # Singular, assuming one-to-many from Transaction to Ticket
     marketplace_listings = db.relationship('MarketplaceListing', back_populates='tickets')
     event = db.relationship('Event', back_populates='tickets', lazy=True)
 

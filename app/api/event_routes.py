@@ -16,7 +16,8 @@ def get_events():
     ).all()
   else:
     events = Event.query.all()
-
+#   print(events)
+#   formatted_events = events
   formatted_events = [event.to_dict() for event in events]
   return jsonify({"events":formatted_events})
 
