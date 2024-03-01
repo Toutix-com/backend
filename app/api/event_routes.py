@@ -87,6 +87,8 @@ def update_event():
         event.OrganizerID = data['OrganizerID']
     if 'image_url' in data:
         event.image_url = data['image_url']
+    if 'EntryRequirement' in data:
+        event.EntryRequirement = data['EntryRequirement']
 
     db.session.commit()
 

@@ -11,22 +11,26 @@ def get_users():
     users = User.query.all()
     return {'users': [user.to_dict() for user in users]}
 
-@user_routes.route('/<string:id>', methods=['GET'])
+@user_routes.route('/me', methods=['GET'])
 @token_required
-def get_user_by_id(id):
-    user = User.query.get(id)
+def get_user_by_id(current_user):
+    user = User.query.filter_by(Email=current_user).first()
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
     return user.to_dict()
 
-@user_routes.route('/<string:id>/tickets', methods=['GET'])
+@user_routes.route('/me/tickets', methods=['GET'])
 @token_required
-def get_user_tickets(id):
-    tickets = Ticket.query.filter_by(user_id=id).all()
+def get_user_tickets(current_user):
+    user_id = User.query.filter_by(Email=current_user).first().UserID
+    tickets = Ticket.query.filter_by(UserID=user_id).all()
     return [ticket.to_dict() for ticket in tickets]
 
-@user_routes.route('/<string:user_id>/tickets/<string:ticket_id>', methods=['GET'])
+@user_routes.route('/me/tickets/<string:ticket_id>', methods=['GET'])
 @token_required
-def get_ticket_by_ids(user_id, ticket_id):
-    ticket = Ticket.query.filter_by(id=ticket_id, user_id=user_id).first()
+def get_ticket_by_ids(current_user, ticket_id):
+    user_id = User.query.filter_by(Email=current_user).first().UserID
+    ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id).first()
 
     if ticket is not None:
         return ticket.to_dict()
@@ -59,7 +63,7 @@ def edit_user(user_id):
 @user_routes.route('/<string:user_id>/tickets/<string:ticket_id>', methods=['DELETE'])
 @token_required
 def delete_ticket(user_id, ticket_id):
-    ticket = Ticket.query.filter_by(id=ticket_id, user_id=user_id).first()
+    ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id).first()
 
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
@@ -69,29 +73,43 @@ def delete_ticket(user_id, ticket_id):
 
     return jsonify({'message': 'Ticket deleted successfully'})
 
-@user_routes.route('/<string:user_id>/tickets/<string:ticket_id>/list_on_marketplace', methods=['PUT'])
+@user_routes.route('/me/tickets/<string:ticket_id>/list_on_marketplace', methods=['PUT'])
 @token_required
-def list_ticket_on_marketplace(user_id, ticket_id):
-    ticket = Ticket.query.filter_by(id=ticket_id, user_id=user_id).first()
+def list_ticket_on_marketplace(current_user, ticket_id):
+    user_id = User.query.filter_by(Email=current_user).first().UserID
+    ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id).first()
 
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
+    
+    if ticket.Status == 'listedonmarketplace':
+        return jsonify({'error': 'Ticket is already listed on marketplace'}), 400
+    
+    if ticket.Status == 'admitted':
+        return jsonify({'error': 'Ticket used, can not be listed'}), 400
 
-    ticket.status = 'listedonmarketplace'
+    ticket.Status = 'listedonmarketplace'
 
     db.session.commit()
 
     return jsonify({'message': 'Ticket listed on marketplace successfully'}), 200
 
-@user_routes.route('/<string:user_id>/tickets/<string:ticket_id>/delist', methods=['PUT'])
+@user_routes.route('/me/tickets/<string:ticket_id>/delist', methods=['PUT'])
 @token_required
 def delist_ticket(user_id, ticket_id):
-    ticket = Ticket.query.filter_by(id=ticket_id, user_id=user_id).first()
+    user_id = User.query.filter_by(Email=current_user).first().UserID
+    ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id).first()
 
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
+    
+    if ticket.Status == 'sold':
+        return jsonify({'error': 'Ticket is not listed on marketplace'}), 400
+    
+    if ticket.Status == 'admitted':
+        return jsonify({'error': 'Ticket used, can not be listed'}), 400
 
-    ticket.status = 'sold'
+    ticket.Status = 'sold'
 
     db.session.commit()
 
