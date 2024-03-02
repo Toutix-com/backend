@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from app.model import Event, Location,db
+from app.model import Event, Location,db, TicketCategory
 from sqlalchemy import or_
 
 event_routes = Blueprint('events', __name__)
@@ -116,3 +116,20 @@ def get_event_ticket_categories(event_id):
     else:
         return jsonify({'message': 'Event not found'}), 404
     
+@event_routes.route('/<event_id>/ticket/create_categories', methods=['POST'])
+def create_ticket_category(event_id):
+    data = request.get_json()
+
+    new_category = TicketCategory(
+        name=data['name'],
+        price=data['price'],
+        max_limit=data['max_limit'],
+        ticket_sold=data.get('ticket_sold', 0),  # optional, defaults to 0
+        description=data.get('description'),  # optional
+        EventID=event_id
+    )
+
+    db.session.add(new_category)
+    db.session.commit()
+    
+    return jsonify(new_category.to_dict()), 201
