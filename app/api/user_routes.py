@@ -37,10 +37,10 @@ def get_ticket_by_ids(current_user, ticket_id):
     else:
         return jsonify({'error': 'Ticket not found'}), 404
 
-@user_routes.route('/<user_id>/update', methods=['PUT'])
+@user_routes.route('/me/update', methods=['PUT'])
 @token_required
-def edit_user(user_id):
-    user = User.query.get(UUID(user_id))
+def edit_user(current_user):
+    user = User.query.filter_by(Email=current_user).first()
     if not user:
         return jsonify({'message': 'User not found'}), 404
 
