@@ -32,16 +32,24 @@ def get_event_by_id(event_id):
 
   if event:
     cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event_id).scalar()
-    total_tickets_left = db.session.query(func.sum(TicketCategory.max_limit - TicketCategory.ticket_sold)).filter(TicketCategory.EventID == event_id).scalar()
 
     if cheapest_ticket_price is None:
         cheapest_ticket_price = 0
-    if total_tickets_left is None:
-        total_tickets_left = 0
     
     formatted_event = event.to_dict()
     formatted_event['cheapest_ticket_price'] = cheapest_ticket_price
-    formatted_event['total_tickets_left'] = total_tickets_left
+
+    # Add total tickets left for each category
+    ticket_categories = TicketCategory.query.filter_by(EventID=event_id).all()
+    formatted_event['ticket_categories'] = []
+    for category in ticket_categories:
+        tickets_left = category.max_limit - category.ticket_sold
+        formatted_event['ticket_categories'].append({
+            'category_id': category.CategoryID,
+            'category_name': category.name,
+            'tickets_left': tickets_left,
+            'price': category.price,
+        })
 
     return jsonify({'event': formatted_event}), 200
   else:
