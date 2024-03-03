@@ -1,13 +1,13 @@
 from flask import Blueprint, jsonify, request
 from app.model import Event, Location,db, TicketCategory
 from sqlalchemy import or_
+from sqlalchemy import func
 
 event_routes = Blueprint('events', __name__)
 
 @event_routes.route('/', methods=['GET'])
 def get_events():
   query = request.args.get('query')
-
   if query:
     events = Event.query.filter(
       or_(
@@ -16,18 +16,34 @@ def get_events():
     ).all()
   else:
     events = Event.query.all()
-#   print(events)
-#   formatted_events = events
-  formatted_events = [event.to_dict() for event in events]
-  return jsonify({"events":formatted_events})
+
+  formatted_events = []
+  for event in events:
+    event_dict = event.to_dict()
+    cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event.EventID).scalar()
+    event_dict['cheapest_ticket_price'] = cheapest_ticket_price if cheapest_ticket_price else 0
+    formatted_events.append(event_dict)
+
+    return jsonify({"events": formatted_events})
 
 @event_routes.route('/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
   event = Event.query.filter_by(EventID=event_id).first()
 
   if event:
+    cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event_id).scalar()
+    total_tickets_left = db.session.query(func.sum(TicketCategory.max_limit - TicketCategory.ticket_sold)).filter(TicketCategory.EventID == event_id).scalar()
+
+    if cheapest_ticket_price is None:
+        cheapest_ticket_price = 0
+    if total_tickets_left is None:
+        total_tickets_left = 0
+    
     formatted_event = event.to_dict()
-    return jsonify({'event':formatted_event}),200
+    formatted_event['cheapest_ticket_price'] = cheapest_ticket_price
+    formatted_event['total_tickets_left'] = total_tickets_left
+
+    return jsonify({'event': formatted_event}), 200
   else:
     return jsonify({'message': 'Event not found'}), 404
 
@@ -134,29 +150,35 @@ def create_ticket_category(event_id):
     
     return jsonify(new_category.to_dict()), 201
 
-@event_routes.route('/api/events/<int:event_id>/ticket/validate', methods=['GET'])
+@event_routes.route('/api/events/<int:event_id>/ticket/validate', methods=['POST'])
 def validate_ticket(event_id):
     # Get the event
     event = Event.query.filter_by(EventID=event_id).first()
+    data = request.json
+    user_id = data.get('userID')
+    ticket_category_id = data.get('ticketCategoryID')
+    number_of_tickets = data.get('numberOfTickets')
 
-    if not event:
-        return jsonify({'message': 'Event not found'}), 404
+    user = User.query.get(user_id)
+    ticket_category = TicketCategory.query.get(ticket_category_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    total_purchased_by_user = Ticket.query.filter_by(UserID=user_id, EventID=event_id).count()
+    # Modify to use a variable later
+    is_eligible_to_purchase = True
+    if total_purchased_by_user + number_of_tickets > 4:
+        is_eligible_to_purchase = False
 
-    # Get the cheapest ticket price and the number of tickets left
-    cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event_id).scalar()
-    tickets_left = db.session.query(func.sum(TicketCategory.max_limit - TicketCategory.ticket_sold)).filter(TicketCategory.EventID == event_id).scalar()
+    price = TicketCategory.query.get(ticket_category_id).price
+    total = price * number_of_tickets
+    service = total * 0.1
 
-    # If there are no tickets, set the cheapest price to 0 and tickets left to 0
-    if cheapest_ticket_price is None:
-        cheapest_ticket_price = 0
-    if tickets_left is None:
-        tickets_left = 0
-
-    # Determine if the user is eligible to purchase a ticket
-    is_eligible_to_purchase = tickets_left > 0
+    tickets_left = ticket_category.max_limit - ticket_category.ticket_sold
+    if tickets_left < number_of_tickets:
+        is_eligible_to_purchase = False
 
     return jsonify({
         'is_eligible_to_purchase': is_eligible_to_purchase,
-        'starting_price': cheapest_ticket_price,
-        'ticket_left': tickets_left
+        'total': total,
+        'service': service,
     }), 200

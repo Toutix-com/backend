@@ -33,6 +33,7 @@ class User(db.Model):
             'Address': self.Address,
             'PhoneNumber': self.PhoneNumber,
             'tickets': [ticket.to_dict() for ticket in self.tickets] if self.tickets else [],
+            'Birthday': self.Birthday.isoformat() if self.Birthday else None,  # Convert to ISO 8601 string format
             #'transactions_as_buyer': [transaction.to_dict() for transaction in self.transactions_as_buyer] if self.transactions_as_buyer else [],
             #'transactions_as_seller': [transaction.to_dict() for transaction in self.transactions_as_seller] if self.transactions_as_seller else [],
         }
