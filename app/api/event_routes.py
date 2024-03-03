@@ -133,3 +133,30 @@ def create_ticket_category(event_id):
     db.session.commit()
     
     return jsonify(new_category.to_dict()), 201
+
+@event_routes.route('/api/events/<int:event_id>/ticket/validate', methods=['GET'])
+def validate_ticket(event_id):
+    # Get the event
+    event = Event.query.filter_by(EventID=event_id).first()
+
+    if not event:
+        return jsonify({'message': 'Event not found'}), 404
+
+    # Get the cheapest ticket price and the number of tickets left
+    cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event_id).scalar()
+    tickets_left = db.session.query(func.sum(TicketCategory.max_limit - TicketCategory.ticket_sold)).filter(TicketCategory.EventID == event_id).scalar()
+
+    # If there are no tickets, set the cheapest price to 0 and tickets left to 0
+    if cheapest_ticket_price is None:
+        cheapest_ticket_price = 0
+    if tickets_left is None:
+        tickets_left = 0
+
+    # Determine if the user is eligible to purchase a ticket
+    is_eligible_to_purchase = tickets_left > 0
+
+    return jsonify({
+        'is_eligible_to_purchase': is_eligible_to_purchase,
+        'starting_price': cheapest_ticket_price,
+        'ticket_left': tickets_left
+    }), 200
