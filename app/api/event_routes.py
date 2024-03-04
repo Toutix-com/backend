@@ -158,7 +158,7 @@ def create_ticket_category(event_id):
     
     return jsonify(new_category.to_dict()), 201
 
-@event_routes.route('/<int:event_id>/ticket/validate', methods=['POST'])
+@event_routes.route('/<event_id>/ticket/validate', methods=['POST'])
 def validate_ticket(event_id):
     # Get the event
     event = Event.query.filter_by(EventID=event_id).first()
