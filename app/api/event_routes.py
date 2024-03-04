@@ -163,9 +163,9 @@ def validate_ticket(event_id):
     # Get the event
     event = Event.query.filter_by(EventID=event_id).first()
     data = request.json
-    user_id = data.get('userID')
-    ticket_category_id = data.get('ticketCategoryID')
-    number_of_tickets = data.get('numberOfTickets')
+    user_id = data.get('user_id')
+    ticket_category_id = data.get('ticket_category_id')
+    number_of_tickets = data.get('number_of_tickets')
 
     user = User.query.get(user_id)
     ticket_category = TicketCategory.query.get(ticket_category_id)
