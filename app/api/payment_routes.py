@@ -135,9 +135,6 @@ def stripe_webhook():
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get('Stripe-Signature')
     endpoint_secret = os.getenv('WEBHOOK_ENDPOINT_SECRET')
-    print("endpoint_secret:", endpoint_secret)
-    print("sig_header:", sig_header)
-    print("payload:", payload)
 
     try:
         event = stripe.Webhook.construct_event(
@@ -159,7 +156,7 @@ def stripe_webhook():
 
         if purchase_type == 'event-tickets':
             ticket_manager = TicketManager(payment_intent['metadata']['userID'])
-            token = ticket_manager.purchase_ticket(
+            ticket_manager.purchase_ticket(
                 payment_intent['metadata']['eventID'], 
                 payment_intent['metadata']['quantity'], 
                 payment_intent['id'], 
@@ -170,7 +167,7 @@ def stripe_webhook():
 
         elif purchase_type == 'marketplace-tickets':
             ticket_manager = TicketManager(payment_intent['metadata']['userID'])
-            token = ticket_manager.purchase_ticket_marketplace(
+            ticket_manager.purchase_ticket_marketplace(
                 payment_intent['metadata']['sellerID'],
                 payment_intent['metadata']['eventID'],
                 payment_intent['id'],
