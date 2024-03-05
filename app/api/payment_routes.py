@@ -134,10 +134,11 @@ def marketplace_ticket():
 def stripe_webhook():
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get('Stripe-Signature')
+    endpoint_secret = os.getenv('WEBHOOK_ENDPOINT_SECRET')
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, sig_header, stripe.api_key
+            payload, sig_header, endpoint_secret
         )
     except ValueError as e:
         # Invalid payload
@@ -150,9 +151,8 @@ def stripe_webhook():
     if event['type'] == 'payment_intent.succeeded':
         payment_intent = event['data']['object']
         purchase_type = payment_intent['metadata']['purchaseType']
-
-        print(payment_intent)
-        print(event)
+        print("event:", event)
+        print("payment_intent:", payment_intent)
 
         if purchase_type == 'event-tickets':
             ticket_manager = TicketManager(payment_intent['metadata']['userID'])
