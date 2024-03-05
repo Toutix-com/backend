@@ -17,10 +17,10 @@ stripe.api_key = os.getenv('STRIPE_API_KEY')
 def charge():
 
     data = request.json
-    user_id = data.get('userID')
-    ticket_category_id = data.get('ticketCategoryID')
-    event_id = data.get('eventID')
-    number_of_tickets = data.get('numberOfTickets')
+    user_id = data.get('user_id')
+    ticket_category_id = data.get('ticket_category_id')
+    event_id = data.get('event_id')
+    number_of_tickets = data.get('number_of_tickets')
 
     if not user_id or not event_id or not ticket_category_id:
         return jsonify({"error": "Event and Ticket details are required."}), 400
