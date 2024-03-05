@@ -49,7 +49,6 @@ def charge(current_user):
         # Calculate service fee
         service = amount * 0.1
         total_amount = amount + service
-        print(int(total_amount))
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
@@ -78,7 +77,7 @@ def charge(current_user):
         return jsonify({"error": str(e)}), 400
 
 
-@payment_routes.route('/intent/marketplace/ticket', endpoint = "marketplace_ticket", methods=['POST'])
+@payment_routes.route('/intent/marketplace/ticket', methods=['POST'])
 @token_required
 def marketplace_ticket():
     data = request.json
@@ -106,7 +105,7 @@ def marketplace_ticket():
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=amount,
+            amount=int(amount)*100,
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
