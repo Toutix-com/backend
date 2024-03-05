@@ -36,7 +36,7 @@ def get_markets():
 
 @market_routes.route('/<market_id>', methods=['GET'])
 def get_market_by_id(market_id):
-    market = Market.query.filter_by(ListingID=market_id).first()
+    market = MarketplaceListing.query.filter_by(ListingID=market_id).first()
 
     if market:
         formatted_market = market.to_dict()

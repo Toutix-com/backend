@@ -8,6 +8,18 @@ from datetime import timedelta
 
 ticket_routes = Blueprint('ticket', __name__)
 
+@ticket_routes.route('/<ticket_id>/validate', methods=['POST'])
+def validate_ticket(ticket_id):
+    ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
+    if ticket is None:
+        return jsonify({'error': 'Ticket not found'}), 404
+
+    if ticket.Status == 'Available':
+        ticket.Status = 'Admitted'
+        return jsonify({'valid': True}), 200
+    else:
+        return jsonify({'valid': False}), 200
+
 class TicketManager:
     def __init__(self, user_id):
         self.userID = user_id
