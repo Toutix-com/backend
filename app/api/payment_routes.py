@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 from app.api.ticket_manager import TicketManager
 import os
 from app.model import PaymentMethod, User, Event, Ticket, TicketCategory, db
+from app.api.auth import token_required
 
 payment_routes = Blueprint('payment', __name__)
 
@@ -13,7 +14,7 @@ stripe.api_key = os.getenv('STRIPE_API_KEY')
 #sk_test_51OjNO1L6oeMlaoGUMj1e7MmK3xoLsj2Gpiaxd1m2xD4KClB6VmfJKxLWtyWuNsjEheUUiKWfN8MlVjyX2UZQ9Ghe00WuZkpqgX
 
 @payment_routes.route('/intent/events/ticket', endpoint = "charge", methods=['POST'])
-@jwt_required
+@token_required
 def charge():
 
     data = request.json
@@ -77,7 +78,7 @@ def charge():
 
 
 @payment_routes.route('/intent/marketplace/ticket', endpoint = "marketplace_ticket", methods=['POST'])
-@jwt_required
+@token_required
 def marketplace_ticket():
     data = request.json
     user_id = data.get('user_id')
