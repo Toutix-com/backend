@@ -15,7 +15,7 @@ stripe.api_key = os.getenv('STRIPE_API_KEY')
 
 @payment_routes.route('/intent/events/ticket', methods=['POST'])
 @token_required
-def charge():
+def charge(current_user):
 
     data = request.json
     user_id = data.get('user_id')
