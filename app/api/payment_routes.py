@@ -12,8 +12,8 @@ payment_routes = Blueprint('payment', __name__)
 stripe.api_key = os.getenv('STRIPE_API_KEY')
 #sk_test_51OjNO1L6oeMlaoGUMj1e7MmK3xoLsj2Gpiaxd1m2xD4KClB6VmfJKxLWtyWuNsjEheUUiKWfN8MlVjyX2UZQ9Ghe00WuZkpqgX
 
-@payment_routes.route('/intent/events/ticket',endpoint='charge', methods=['POST'])
-#@jwt_required
+@payment_routes.route('/intent/events/ticket', methods=['POST'])
+@jwt_required
 def charge():
 
     data = request.json
@@ -51,7 +51,7 @@ def charge():
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=total_amount,
+            amount=int(total_amount),
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
@@ -76,15 +76,15 @@ def charge():
         return jsonify({"error": str(e)}), 400
 
 
-@payment_routes.route('/intent/marketplace/ticket',endpoint='marketplace_ticket', methods=['POST'])
-#@jwt_required
+@payment_routes.route('/intent/marketplace/ticket', methods=['POST'])
+@jwt_required
 def marketplace_ticket():
     data = request.json
-    user_id = data.get('userID')
-    ticket_id = data.get('ticketID')
-    ticket_category_id = data.get('ticketCategoryID')
-    resale_price = data.get('resalePrice')
-    event_id = data.get('eventID')
+    user_id = data.get('user_id')
+    ticket_id = data.get('ticket_id')
+    ticket_category_id = data.get('ticket_category_id')
+    resale_price = data.get('resale_price')
+    event_id = data.get('event_id')
 
     if not user_id or not event_id or not ticket_id:
         return jsonify({"error": "Event and Ticket details are required."}), 400
@@ -110,10 +110,10 @@ def marketplace_ticket():
                 'enabled': True,
             },
             metadata={
-                'userID': user.id,
-                'sellerID': ticket.user_id, 
-                'userEmail': user.email,
-                'eventID': event.id,
+                'userID': user.UserID,
+                'sellerID': ticket.UserID, 
+                'userEmail': user.Email,
+                'eventID': event.EventID,
                 'ticketID': ticket_id,
                 'purchaseType': 'marketplace-tickets',
                 'price': resale_price
