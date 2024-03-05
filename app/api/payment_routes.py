@@ -151,6 +151,9 @@ def stripe_webhook():
         payment_intent = event['data']['object']
         purchase_type = payment_intent['metadata']['purchaseType']
 
+        print(payment_intent)
+        print(event)
+
         if purchase_type == 'event-tickets':
             ticket_manager = TicketManager(payment_intent['metadata']['userID'])
             token = ticket_manager.purchase_ticket(
