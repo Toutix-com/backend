@@ -57,8 +57,8 @@ def charge():
                 'enabled': True,
             },
             metadata={
-                'userID': user.id,
-                'eventID': event.id,
+                'userID': user.UserID,
+                'eventID': event.EventID,
                 'purchaseType': 'event-tickets',
                 'quantity': number_of_tickets,
                 'TransactionAmount': total_amount,
