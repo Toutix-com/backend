@@ -49,11 +49,11 @@ def charge(current_user):
         # Calculate service fee
         service = amount * 0.1
         total_amount = amount + service
-        print(total_amount)
+        print(int(total_amount))
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=int(total_amount),
+            amount=int(total_amount)*100,
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
