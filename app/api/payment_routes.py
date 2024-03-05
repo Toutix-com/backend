@@ -32,7 +32,7 @@ def charge():
     
     # Check inventory to see if there are enough tickets
     ticket_category = TicketCategory.query.get(ticket_category_id)
-    if ticket_category.ticket_sold + number_of_tickets > ticket_category.ticket_limit:
+    if ticket_category.ticket_sold + number_of_tickets > ticket_category.max_limit:
         return jsonify({"error": "Not enough tickets available"}), 400
     
     try:
