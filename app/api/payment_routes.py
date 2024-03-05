@@ -52,7 +52,7 @@ def charge(current_user):
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=int(total_amount)*100,
+            amount=int(total_amount*100),
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
@@ -105,7 +105,7 @@ def marketplace_ticket():
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=int(amount)*100,
+            amount=int(amount*100),
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
