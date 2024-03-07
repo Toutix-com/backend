@@ -135,6 +135,9 @@ def stripe_webhook():
     payload = request.get_data(as_text=True)
     sig_header = request.headers.get('Stripe-Signature')
     endpoint_secret = os.getenv('WEBHOOK_ENDPOINT_SECRET')
+    print("payload:", payload)
+    print("sig_header:", sig_header)
+    print("endpoint_secret:", endpoint_secret)
 
     try:
         event = stripe.Webhook.construct_event(
