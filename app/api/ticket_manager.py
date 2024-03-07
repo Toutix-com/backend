@@ -2,7 +2,7 @@ from flask import Flask, Blueprint, request, jsonify
 import random
 import string
 from datetime import datetime, timezone
-from app.model import User, db, Event, Transaction, Ticket
+from app.model import User, db, Event, Transaction, Ticket, ticket_category
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
