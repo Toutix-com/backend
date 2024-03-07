@@ -143,6 +143,7 @@ def stripe_webhook():
         event = stripe.Webhook.construct_event(
             payload, sig_header, endpoint_secret
         )
+        print("event_146:", event)
     except ValueError as e:
         # Invalid payload
         return 'Invalid payload', 400
@@ -150,11 +151,12 @@ def stripe_webhook():
         # Invalid signature
         return 'Invalid signature', 400
 
+    print("event_154:", event)
     # Handle the event
     if event['type'] == 'payment_intent.succeeded':
         payment_intent = event['data']['object']
         purchase_type = payment_intent['metadata']['purchaseType']
-        print("event:", event)
+        print("event_159:", event)
         print("payment_intent:", payment_intent)
 
         if purchase_type == 'event-tickets':
