@@ -2,7 +2,7 @@ from flask import Flask, Blueprint, request, jsonify
 import random
 import string
 from datetime import datetime, timezone
-from app.model import User, db, Event, Transaction, Ticket, ticket_category
+from app.model import User, db, Event, Transaction, Ticket, TicketCategory
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
@@ -26,7 +26,7 @@ class TicketManager:
 
     def purchase_ticket(self, event_id, quantity, paymentmethod_id, TransactionAmount, CategoryID, initialprice):
         user = User.query.get(self.userID)
-        category = ticket_category.query.get(CategoryID)
+        category = TicketCategory.query.get(CategoryID)
         if user is None:
             return jsonify({'error': 'User not found'}), 404
 
