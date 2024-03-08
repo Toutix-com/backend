@@ -19,13 +19,15 @@ class Ticket(db.Model):
     Status = db.Column(db.Enum(StatusEnum,name='Status'))
     EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'))
     TransactionID = db.Column(UUID(as_uuid=True), db.ForeignKey('transactions.TransactionID'))
-    Category = db.Column(db.String(255))
+    CategoryID = db.Column(UUID(as_uuid=True), db.ForeignKey('ticket_categories.CategoryID'))
     CreationDate = db.Column(db.DateTime, server_default=db.func.now())
+    QR_STATUS = db.Column(db.Boolean, default=False)
 
     user = db.relationship('User', back_populates='tickets')
     transactions = db.relationship('Transaction', back_populates='tickets') # Singular, assuming one-to-many from Transaction to Ticket
     marketplace_listings = db.relationship('MarketplaceListing', back_populates='tickets')
     event = db.relationship('Event', back_populates='tickets', lazy=True)
+    category = db.relationship('TicketCategory', back_populates='tickets', lazy=True)
 
     def to_dict(self):
         return {
@@ -35,5 +37,7 @@ class Ticket(db.Model):
             "InitialPrice": str(self.initialPrice),  
             "Price": str(self.Price),
             "Status": self.Status.name if self.Status else None,  # Access Enum value name
-            "Category": self.Category
+            "Category": self.category.to_dict() if self.category else None,  
+            "Transaction": self.transactions.to_dict() if self.transactions else None,  
+            "Event": self.event.to_dict() if self.event else None  
         }
