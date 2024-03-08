@@ -45,7 +45,7 @@ class TicketManager:
         
         # Assuming that there is available tickets in the inventory
         for _ in range(int(quantity)):
-            if category.ticket_sold >= category.ticket_limit:
+            if category.ticket_sold >= category.max_limit:
                 return {
             'error': 'Not enough tickets available'
             }
