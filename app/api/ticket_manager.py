@@ -44,7 +44,7 @@ class TicketManager:
         db.session.flush()
         
         # Assuming that there is available tickets in the inventory
-        for _ in range(quantity):
+        for _ in range(int(quantity)):
             if category.ticket_sold >= category.ticket_limit:
                 return {
             'error': 'Not enough tickets available'
