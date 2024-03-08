@@ -49,7 +49,7 @@ class TicketManager:
                 return {
             'error': 'Not enough tickets available'
             }
-            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, initialprice=initialprice, EventID=event_id, Category=category.name, Status='Available', Price=initialprice, SeatNumber=seat_number)
+            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, initialprice=initialprice, EventID=event_id, Category=category.name, Status='Available', Price=initialprice)
             category.ticket_sold += 1
             db.session.add(ticket)
 
