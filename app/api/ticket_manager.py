@@ -24,7 +24,7 @@ class TicketManager:
     def __init__(self, user_id):
         self.userID = user_id
 
-    def purchase_ticket(self, event_id, quantity, paymentmethod_id, TransactionAmount, CategoryID, initialprice):
+    def purchase_ticket(self, event_id, quantity, paymentmethod_id, TransactionAmount, CategoryID, initialPrice):
         user = User.query.get(self.userID)
         category = TicketCategory.query.get(CategoryID)
         if user is None:
@@ -49,7 +49,7 @@ class TicketManager:
                 return {
             'error': 'Not enough tickets available'
             }
-            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, initialprice=initialprice, EventID=event_id, Category=category.name, Status='Available', Price=initialprice)
+            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, initialprice=initialprice, EventID=event_id, Category=category.name, Status='Available', Price=initialPrice)
             category.ticket_sold += 1
             db.session.add(ticket)
 
