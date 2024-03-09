@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from app.model import Event, Location,db, TicketCategory, Ticket, User
+from app.model import Event, Location,db, Ticket, TicketCategory, User
 from sqlalchemy import or_
 from sqlalchemy import func
 from app.api.auth import token_required

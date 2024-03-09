@@ -14,6 +14,7 @@ class TicketCategory(db.Model):
     EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'), nullable=False)
 
     event = db.relationship('Event', back_populates='ticket_categories')
+    tickets = db.relationship('Ticket', back_populates='ticket_categories', lazy=True)
 
     def to_dict(self):
         return {
