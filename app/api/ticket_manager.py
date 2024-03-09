@@ -5,20 +5,32 @@ from datetime import datetime, timezone
 from app.model import User, db, Event, Transaction, Ticket, TicketCategory
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
+from app.api.auth import token_required
 
 ticket_routes = Blueprint('ticket', __name__)
 
 @ticket_routes.route('/<ticket_id>/validate', methods=['POST'])
-def validate_ticket(ticket_id):
+@token_required
+def validate_ticket(current_user, ticket_id):
     ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
 
     if ticket.Status == 'Available':
         ticket.Status = 'Admitted'
-        return jsonify({'valid': True}), 200
+        return jsonify({'Success': True}), 200
     else:
-        return jsonify({'valid': False}), 200
+        return jsonify({'Success': False}), 200
+
+@ticket_routes.route('/<ticket_id>', methods=['GET'])
+@token_required
+def get_ticket_by_ids(current_user, ticket_id):
+    ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
+
+    if ticket is not None:
+        return ticket.to_dict()
+    else:
+        return jsonify({'error': 'Ticket not found'}), 404
 
 class TicketManager:
     def __init__(self, user_id):
