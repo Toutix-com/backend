@@ -21,7 +21,6 @@ class Transaction(db.Model):
     def to_dict(self):
         return {
             'TransactionID': str(self.TransactionID),  # Convert UUID to string for JSON compatibility
-            'TicketID': str(self.TicketID),
             'BuyerID': str(self.BuyerID),
             'SellerID': str(self.SellerID),
             'PaymentMethodID': str(self.PaymentMethodID),
