@@ -37,7 +37,7 @@ class Ticket(db.Model):
             "InitialPrice": str(self.initialPrice),  
             "Price": str(self.Price),
             "Status": self.Status.name if self.Status else None,  # Access Enum value name
-            #"Category": self.category.to_dict() if self.category else None,  
-            #"Transaction": self.transactions.to_dict() if self.transactions else None,  
-            #"Event": self.event.to_dict() if self.event else None  
+            "Category": self.category.to_dict() if self.category else None,  
+            "Transaction": self.transactions.to_dict() if self.transactions else None,  
+            "Event": self.event.to_dict() if self.event else None  
         }
