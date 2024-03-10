@@ -10,10 +10,8 @@ market_routes = Blueprint('markets', __name__)
 @market_routes.route('/', methods=['GET'])
 def get_markets():
     query = request.args.get('query')
-    location = request.args.get('location')
-    events = request.args.get('events')
 
-    base_query = Ticket.query.filter(Ticket.Status == StatusEnum.ListedonMarketplace).options(joinedload('event'))
+    base_query = Ticket.query.filter(Ticket.Status == StatusEnum.ListedonMarketplace).options(joinedload(Ticket.event))
 
     if query:
         tickets = base_query.filter(
@@ -21,14 +19,6 @@ def get_markets():
                 Ticket.event.Name.ilike(f'%{query}%'),
                 Ticket.event.location.ilike(f'%{query}%')
             )
-        ).all()
-    elif location:
-        tickets = base_query.filter(
-            Ticket.event.location.ilike(f'%{location}%')
-        ).all()
-    elif events:
-        tickets = base_query.filter(
-            Ticket.event.Name.ilike(f'%{events}%')
         ).all()
     else:
         tickets = base_query.all()
