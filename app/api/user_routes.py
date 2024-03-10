@@ -83,7 +83,7 @@ def list_ticket_on_marketplace(current_user, ticket_id):
 
     if price > 2*ticket.initialPrice:
         return jsonify({'error': 'Ticket price is too high'}), 400
-    ticket.price = price
+    ticket.Price = price
 
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
