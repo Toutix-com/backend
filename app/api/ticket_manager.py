@@ -2,7 +2,7 @@ from flask import Flask, Blueprint, request, jsonify
 import random
 import string
 from datetime import datetime, timezone
-from app.model import User, db, Event, Transaction, Ticket, TicketCategory
+from app.model import User, db, Event, Transaction, Ticket, TicketCategory, StatusEnum
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 from app.api.auth import token_required
@@ -16,8 +16,9 @@ def validate_ticket(current_user, ticket_id):
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
 
-    if ticket.Status == 'Available':
-        ticket.Status = 'Admitted'
+    if ticket.Status == StatusEnum.Available:
+        ticket.Status = StatusEnum.Admitted
+        db.session.commit()
         return jsonify({'Success': True}), 200
     else:
         return jsonify({'Success': False}), 200
@@ -61,7 +62,7 @@ class TicketManager:
                 return {
             'error': 'Not enough tickets available'
             }
-            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, EventID=event_id, CategoryID=CategoryID, Status='Available', initialPrice=initialPrice)
+            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, EventID=event_id, CategoryID=CategoryID, Status=StatusEnum.Available, initialPrice=initialPrice)
             category.ticket_sold += 1
             db.session.add(ticket)
 
@@ -97,9 +98,11 @@ class TicketManager:
 
         # Modify the ticket to have the new owner and status as sold
         ticket.UserID = self.userID
-        ticket.Status = 'sold'
+        ticket.Status = StatusEnum.Sold
         ticket.price = price
         ticket.TransactionID = transaction.TransactionID
+
+        db.session.commit()
 
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -117,7 +120,7 @@ class TicketManager:
             return jsonify({'error': 'New owner not found'}), 404
 
         ticket.UserID = new_owner.UserID
-        ticket.Status = 'Sold'
+        ticket.Status = StatusEnum.Sold
 
         db.session.commit()
 

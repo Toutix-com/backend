@@ -58,7 +58,7 @@ class OTPManager:
             "otp": self.otp
         })
     
-    def generate_access_token(self, identity, expires_delta=timedelta(hours=2)):
+    def generate_access_token(self, identity, expires_delta=timedelta(days=7)):
         access_token = create_access_token(identity=identity, expires_delta=expires_delta)
         return access_token
     

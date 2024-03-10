@@ -34,10 +34,13 @@ class Ticket(db.Model):
             "TicketID": str(self.TicketID),  
             "UserID": str(self.UserID) if self.UserID else None,  
             "SeatNumber": self.SeatNumber,
-            "InitialPrice": str(self.initialPrice),  
-            "Price": str(self.Price),
+            "InitialPrice": self.initialPrice,  
+            "Price": self.Price,
             "Status": self.Status.name if self.Status else None,  # Access Enum value name
             "Category": self.ticket_categories.to_dict() if self.ticket_categories else None,
             "Transaction": self.transactions.to_dict() if self.transactions else None,  
-            "Event": self.event.to_dict() if self.event else None  
+            "Event": self.event.to_dict() if self.event else None,
+            "QR_STATUS": self.QR_STATUS,
+            #Name of the owner of the ticket
+            
         }

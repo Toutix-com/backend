@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 from datetime import datetime
-from app.model import User, Ticket, Event, db, Transaction
+from app.model import User, Ticket, Event, db, Transaction, MarketplaceListing, StatusEnum
 from app.api.auth import token_required
 
 user_routes = Blueprint('users', __name__)
@@ -78,17 +78,23 @@ def delete_ticket(user_id, ticket_id):
 def list_ticket_on_marketplace(current_user, ticket_id):
     user_id = User.query.filter_by(Email=current_user).first().UserID
     ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id).first()
+    data = request.get_json()
+    price = data.get('price')
+
+    if price > 2*ticket.initialPrice:
+        return jsonify({'error': 'Ticket price is too high'}), 400
+    ticket.price = price
 
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
     
-    if ticket.Status == 'listedonmarketplace':
+    if ticket.Status == StatusEnum.ListedonMarketplace:
         return jsonify({'error': 'Ticket is already listed on marketplace'}), 400
     
-    if ticket.Status == 'admitted':
+    if ticket.Status == StatusEnum.Admitted:
         return jsonify({'error': 'Ticket used, can not be listed'}), 400
 
-    ticket.Status = 'listedonmarketplace'
+    ticket.Status = StatusEnum.ListedonMarketplace
 
     db.session.commit()
 
@@ -103,13 +109,13 @@ def delist_ticket(user_id, ticket_id):
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
     
-    if ticket.Status == 'sold':
+    if ticket.Status == StatusEnum.Sold:
         return jsonify({'error': 'Ticket is not listed on marketplace'}), 400
     
-    if ticket.Status == 'admitted':
+    if ticket.Status == StatusEnum.Admitted:
         return jsonify({'error': 'Ticket used, can not be listed'}), 400
 
-    ticket.Status = 'sold'
+    ticket.Status = StatusEnum.Sold
 
     db.session.commit()
 
