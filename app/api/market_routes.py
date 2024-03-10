@@ -28,7 +28,7 @@ def get_markets():
     
 @market_routes.route('/events', methods=['GET'])
 def get_events_with_tickets_on_marketplace():
-    tickets = Ticket.query.filter_by(Status=StatusEnum.ListedonMarketplace.value).all()
+    tickets = Ticket.query.filter(Ticket.Status == StatusEnum.ListedonMarketplace).all()
 
     if tickets:
         event_ids = [ticket.EventID for ticket in tickets]
@@ -40,11 +40,11 @@ def get_events_with_tickets_on_marketplace():
         else:
             return jsonify({'message': 'No events found for these tickets'}), 404
     else:
-        return jsonify({'message': 'No tickets found on the marketplace'}), 404
+        return jsonify({'message': 'No tickets found on the marketplace', "events":[]}), 200
 
 @market_routes.route('/<event_id>', methods=['GET'])
 def get_market_by_id(event_id):
-    tickets = Ticket.query.filter_by(EventID=event_id, Status=StatusEnum.ListedonMarketplace.value).all()
+    tickets = Ticket.query.filter(Ticket.EventID==event_id, Ticket.Status== StatusEnum.ListedonMarketplace).all()
 
     if tickets:
         formatted_tickets = [ticket.to_dict() for ticket in tickets]
