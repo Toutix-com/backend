@@ -102,7 +102,7 @@ def list_ticket_on_marketplace(current_user, ticket_id):
 
 @user_routes.route('/me/tickets/<string:ticket_id>/delist', methods=['PUT'])
 @token_required
-def delist_ticket(user_id, ticket_id):
+def delist_ticket(current_user, user_id, ticket_id):
     user_id = User.query.filter_by(Email=current_user).first().UserID
     ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id).first()
 
@@ -115,7 +115,7 @@ def delist_ticket(user_id, ticket_id):
     if ticket.Status == StatusEnum.Admitted:
         return jsonify({'error': 'Ticket used, can not be listed'}), 400
 
-    ticket.Status = StatusEnum.Sold
+    ticket.Status = StatusEnum.Available
 
     db.session.commit()
 
