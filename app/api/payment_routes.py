@@ -96,14 +96,14 @@ def marketplace_ticket(current_user):
         ticket = Ticket.query.get(ticket_id)
         
         if float(resale_price) <= 2* float(ticket.initialPrice):
-            amount = resale_price
+            amount = int(float(resale_price) * 100)
         else:
             raise ValueError("Resale price cannot be more than double the original price")
         currency = 'gbp'  # Assuming currency is USD
 
         # Create Payment Intent with metadata containing relevant information
         intent = stripe.PaymentIntent.create(
-            amount=int(amount*100),
+            amount=amount,
             currency=currency,
             automatic_payment_methods={
                 'enabled': True,
