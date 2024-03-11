@@ -83,7 +83,6 @@ def marketplace_ticket(current_user):
     data = request.json
     user_id = data.get('user_id')
     ticket_id = data.get('ticket_id')
-    ticket_category_id = data.get('ticket_category_id')
     resale_price = data.get('resale_price')
     event_id = data.get('event_id')
 
@@ -94,11 +93,9 @@ def marketplace_ticket(current_user):
         # Retrieve user, event, and ticket category information
         user = User.query.get(user_id)
         event = Event.query.get(event_id)
-        ticket_category = TicketCategory.query.filter_by(CategoryID=ticket_category_id).first()
         ticket = Ticket.query.get(ticket_id)
         
-        print(ticket_category)
-        if resale_price <= 2* ticket_category.price:
+        if resale_price <= 2* ticket.initialPrice:
             amount = resale_price
         else:
             raise ValueError("Resale price cannot be more than double the original price")
