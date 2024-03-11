@@ -64,16 +64,27 @@ def validate_ticket(current_user, event_id):
 
     ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
     user = User.query.get(user_id)
+    is_eligible_to_purchase = True
     if not user:
         return jsonify({'error': 'User not found'}), 404
+    # Check if seller = buyer
+    if ticket.UserID == user_id:
+        is_eligible_to_purchase = False
+    
+    # Check if it has been admited/sold
+    if ticket.Status == StatusEnum.Admitted:
+        is_eligible_to_purchase = False
+    if ticket.Status == StatusEnum.Sold:
+        is_eligible_to_purchase = False
+    
     total_purchased_by_user = Ticket.query.filter_by(UserID=user_id, EventID=event_id).count()
     # Modify to use a variable later
-    is_eligible_to_purchase = True
+
+    # Check if user is eligible to purchase
     if total_purchased_by_user + 1 > 4:
         is_eligible_to_purchase = False
 
     price = ticket.Price
-    print(type(price))
     service = price * Decimal('0.1')
     total = price + service
 
