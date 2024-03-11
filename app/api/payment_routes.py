@@ -97,7 +97,7 @@ def marketplace_ticket(current_user):
         ticket_category = TicketCategory.query.get(ticket_category_id)
         ticket = Ticket.query.get(ticket_id)
         
-        print(ticket_category, ticket_category.price, resale_price, ticket.UserID, user.UserID)
+        print(ticket_category)
         if resale_price <= 2* ticket_category.price:
             amount = resale_price
         else:
