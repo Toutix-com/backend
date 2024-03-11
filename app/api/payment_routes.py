@@ -94,7 +94,7 @@ def marketplace_ticket(current_user):
         # Retrieve user, event, and ticket category information
         user = User.query.get(user_id)
         event = Event.query.get(event_id)
-        ticket_category = TicketCategory.query.get(ticket_category_id)
+        ticket_category = TicketCategory.query.filter_by(CategoryID=ticket_category_id).first()
         ticket = Ticket.query.get(ticket_id)
         
         print(ticket_category)
