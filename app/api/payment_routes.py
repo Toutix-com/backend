@@ -95,7 +95,7 @@ def marketplace_ticket(current_user):
         event = Event.query.get(event_id)
         ticket = Ticket.query.get(ticket_id)
         
-        if resale_price <= 2* ticket.initialPrice:
+        if float(resale_price) <= 2* ticket.initialPrice:
             amount = resale_price
         else:
             raise ValueError("Resale price cannot be more than double the original price")
