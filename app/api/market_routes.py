@@ -3,6 +3,7 @@ from app.model import MarketplaceListing, Event, db, Ticket, User, TicketCategor
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from app.api.auth import token_required
+from decimal import Decimal
 
 market_routes = Blueprint('markets', __name__)
 
@@ -72,7 +73,8 @@ def validate_ticket(current_user, event_id):
         is_eligible_to_purchase = False
 
     price = ticket.Price
-    service = price * 0.1
+    print(type(price))
+    service = price * Decimal('0.1')
     total = price + service
 
     return jsonify({
