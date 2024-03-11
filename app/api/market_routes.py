@@ -54,7 +54,7 @@ def get_market_by_id(event_id):
     
 @market_routes.route('/<event_id>/validate', methods=['POST'])
 @token_required
-def validate_ticket(current_user, ticket_id):
+def validate_ticket(current_user, event_id):
     # Get the event
     event = Event.query.filter_by(EventID=event_id).first()
     data = request.json
