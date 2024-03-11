@@ -90,7 +90,7 @@ def validate_ticket(current_user, event_id):
 
     return jsonify({
         'is_eligible_to_purchase': is_eligible_to_purchase,
-        'total': total,
-        'service': service,
+        'total': float(total),
+        'service': float(service),
     }), 200
   
