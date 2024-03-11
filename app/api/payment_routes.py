@@ -79,7 +79,7 @@ def charge(current_user):
 
 @payment_routes.route('/intent/marketplace/ticket', methods=['POST'])
 @token_required
-def marketplace_ticket():
+def marketplace_ticket(current_user):
     data = request.json
     user_id = data.get('user_id')
     ticket_id = data.get('ticket_id')
