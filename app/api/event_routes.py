@@ -25,7 +25,7 @@ def get_events():
     event_dict['cheapest_ticket_price'] = cheapest_ticket_price if cheapest_ticket_price else 0
     formatted_events.append(event_dict)
 
-    return jsonify({"events": formatted_events})
+  return jsonify({"events": formatted_events})
 
 @event_routes.route('/<event_id>', methods=['GET'])
 def get_event_by_id(event_id):
