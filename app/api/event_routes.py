@@ -9,6 +9,9 @@ event_routes = Blueprint('events', __name__)
 @event_routes.route('/', methods=['GET'])
 def get_events():
   query = request.args.get('query')
+  # Hide the hidden event
+  hidden_event_uuid = "083b940a-0b62-4d89-b919-44b1a9127e75"
+
   if query:
     events = Event.query.filter(
       or_(
@@ -16,7 +19,7 @@ def get_events():
       )
     ).all()
   else:
-    events = Event.query.all()
+    events = Event.query.filter(Event.EventID != hidden_event_uuid).all()  # Exclude the event by its UUID
 
   formatted_events = []
   for event in events:
