@@ -25,15 +25,57 @@ def token_required(f):
 def login():
     data = request.json
     email = data.get('email')
+    is_social_login = data.get('is_social_login')
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
     if not email:
         return jsonify({"error": "Email is required."}), 400
 
-    otp_manager = OTPManager(email)
-    otp_manager.generate_store_otp()
-    if otp_manager.send_otp():
-        return otp_manager.send_otp(), 200
+    if is_social_login:
+        user = User.query.filter_by(Email=email).first()
+        if not user:
+            # Create a new user
+            user = User(Email=email, FirstName=first_name, LastName=last_name)
+            db.session.add(user)
+            db.session.commit()
+
+        # Determine if it's the user's first login
+        first_time_login = user.last_login is None
+
+        # Update last login time to current datetime
+        user.last_login = datetime.utcnow()
+
+        # Generate access token
+        otp_manager = OTPManager(email)
+        access_token = otp_manager.generate_access_token(identity=email)
+
+        # Store the access token in the user's record
+        user.Token = access_token
+        db.session.commit()
+
+        login_user(user, force=True)
+
+        first_name = user.FirstName
+        last_name = user.LastName
+
+        # Return access token, email, and first_time_login boolean
+        return jsonify({
+            "access_token": access_token,
+            "email": user.Email,
+            "first_time_login": first_time_login,
+            "user_id": user.UserID,
+            "message": "You are logged in.",
+            "social_login": True,
+            "first_name": first_name,
+            "last_name": last_name  
+        }), 200
     else:
-        return jsonify({"error": "Failed to send OTP."}), 400
+        otp_manager = OTPManager(email)
+        otp_manager.generate_store_otp()
+        if otp_manager.send_otp():
+            return otp_manager.send_otp(), 200
+        else:
+            return jsonify({"error": "Failed to send OTP."}), 400
 
 @auth_routes.route('/validateOTP', methods=['POST'])
 def validate_otp():
