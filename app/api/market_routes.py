@@ -13,7 +13,7 @@ def get_markets():
     hidden_event_uuid = "083b940a-0b62-4d89-b919-44b1a9127e75"
     query = request.args.get('query')
 
-    base_query = Ticket.query.filter(Ticket.Status == StatusEnum.ListedonMarketplace).options(joinedload(Ticket.event))
+    base_query = Ticket.query.filter(Ticket.Status == StatusEnum.ListedonMarketplace, Ticket.EventID != hidden_event_uuid).options(joinedload(Ticket.event))
 
     if query:
         tickets = base_query.filter(
@@ -23,7 +23,7 @@ def get_markets():
             )
         ).all()
     else:
-        tickets = base_query.filter(Ticket.EventID != hidden_event_uuid).all()
+        tickets = base_query.all()
 
     return jsonify([ticket.to_dict() for ticket in tickets])
 
