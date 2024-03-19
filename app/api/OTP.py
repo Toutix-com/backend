@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from app.model import User, db
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
+import smtplib
 
 otp_routes = Blueprint('otp', __name__)
 
@@ -37,26 +38,22 @@ class OTPManager:
         # Return json message to frontend
         self.otp, self.expiry = self.generate_store_otp()
         expiry_iso = datetime.fromtimestamp(self.expiry, timezone.utc).isoformat()
-        '''
-         smtp_server = smtplib.SMTP('smtp.example.com', 587)  # replace with your SMTP server details
-        smtp_server.starttls()
-        smtp_server.login('username', 'password')  # replace with your SMTP server credentials
+        email = "zhangdaniel0120@gmail.com"
+        receiver_email = "dxmaptin@gmail.com"
 
-        # Create the email
-        msg = MIMEText(f'Your OTP is {self.otp} and it expires at {expiry_iso}')
-        msg['Subject'] = 'Your OTP'
-        msg['From'] = 'sender@example.com'  # replace with your email
-        msg['To'] = self.email
+        subject = "Your OTP with Toutix"
+        message = f"Your OTP is{self.otp} \n\n The expiry on that is {expiry_iso}"
 
-        # Send the email
-        smtp_server.send_message(msg)
+        text = f"Subject: {subject} \n\n {message}"
 
-        smtp_server.quit()'''
-        return jsonify({
-            "message": f"OTP sent successfully to {self.email}",
-            "otp_expiry": expiry_iso,
-            "otp": self.otp
-        })
+        try:
+            server = smtplib.SMTP_SSL("smtp.gmail.com", 465)  # Using SMTP_SSL for a secure connection
+            server.login(email, password)
+            server.sendmail(email, receiver_email, text)
+        except Exception as e:
+            return jsonify({"message": "Error"}), 404
+        finally:
+            server.quit()
     
     def generate_access_token(self, identity, expires_delta=timedelta(days=7)):
         access_token = create_access_token(identity=identity, expires_delta=expires_delta)
