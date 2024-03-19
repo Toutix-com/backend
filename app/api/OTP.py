@@ -47,9 +47,15 @@ class OTPManager:
         text = f"Subject: {subject} \n\n {message}"
 
         try:
-            server = smtplib.SMTP_SSL("smtp.gmail.com", 465)  # Using SMTP_SSL for a secure connection
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()  # Using SMTP_SSL for a secure connection
             server.login(email, password)
             server.sendmail(email, receiver_email, text)
+            return jsonify({
+            "message": f"OTP sent successfully to {self.email}",
+            "otp_expiry": expiry_iso,
+            "otp": self.otp
+        })
         except Exception as e:
             return jsonify({"message": "Error"}), 404
         finally:
