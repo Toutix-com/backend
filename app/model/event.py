@@ -16,6 +16,7 @@ class Event(db.Model):
     OrganizerID = db.Column(UUID(as_uuid=True), db.ForeignKey('organizers.OrganizerID'), nullable=False)
     image_url = db.Column(db.String(255), nullable=True)
     EntryRequirement = db.Column(db.String(255), nullable=True)
+    ticket_count = db.Column(db.Integer, default=0) 
 
     # Relationships
     location = db.relationship('Location', back_populates='events', lazy=True) # This is a one-to-one relationship, eg an event has one location
