@@ -12,6 +12,7 @@ class TicketCategory(db.Model):
     ticket_sold = db.Column(db.Integer, nullable=False, default=0)
     description = db.Column(db.Text, nullable=True)
     EventID = db.Column(UUID(as_uuid=True), db.ForeignKey('events.EventID'), nullable=False)
+    max_per_person = db.Column(db.Integer, nullable=True, default=10)
 
     event = db.relationship('Event', back_populates='ticket_categories')
     tickets = db.relationship('Ticket', back_populates='ticket_categories', lazy=True)
@@ -23,5 +24,6 @@ class TicketCategory(db.Model):
             'price': self.price,
             'max_limit': self.max_limit,
             'ticket_sold': self.ticket_sold,
-            'description': self.description
+            'description': self.description,
+            'max_per_person': self.max_per_person
         }

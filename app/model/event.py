@@ -16,7 +16,11 @@ class Event(db.Model):
     OrganizerID = db.Column(UUID(as_uuid=True), db.ForeignKey('organizers.OrganizerID'), nullable=False)
     image_url = db.Column(db.String(255), nullable=True)
     EntryRequirement = db.Column(db.String(255), nullable=True)
-    ticket_count = db.Column(db.Integer, default=0) 
+    ticket_sales = db.Column(db.Integer, default=0)  # Number of tickets sold
+    resold_tickets = db.Column(db.Integer, default=0)  # Number of tickets resold
+    total_resold_revenue = db.Column(db.Float, default=0.0)  # Total revenue from resold tickets
+    resold_revenue_share_to_business = db.Column(db.Float, default=0.0)  # Revenue share to the business from resold tickets
+    total_revenue = db.Column(db.Float, default=0.0)  # Total revenue (ticket sales revenue + resold revenue share to business)
 
     # Relationships
     location = db.relationship('Location', back_populates='events', lazy=True) # This is a one-to-one relationship, eg an event has one location

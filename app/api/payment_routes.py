@@ -166,6 +166,7 @@ def stripe_webhook():
             )
 
         elif purchase_type == 'marketplace-tickets':
+            # Handles payment and tickets for new buyer of second hand ticket
             ticket_manager = TicketManager(payment_intent['metadata']['userID'])
             ticket_manager.purchase_ticket_marketplace(
                 payment_intent['metadata']['sellerID'],
@@ -174,7 +175,22 @@ def stripe_webhook():
                 payment_intent['metadata']['price'],
                 payment_intent['metadata']['ticketID']
             )
-    
+
+            # Handles refund for seller of second hand ticket
+            #Fill the original price
+            original_price = payment_intent['metadata']['initialPrice']
+            resale_price = payment_intent['metadata']['price']
+            if resale_price >= original_price:
+                refund_amount = int((original_price + 0.5 * (resale_price - original_price)) * 100)
+            else:
+                refund_amount = int(resale_price * 100)
+            
+            try:
+                # Replace the payment intent id with the sellers ID
+                stripe.Refund.create(payment_intent=payment_intent['id'], amount=refund_amount)
+                print(f"Refund of {refund_amount / 100} for payment intent {payment_intent.id} successful")
+            except stripe.error.StripeError as e:
+                print(f"Failed to refund for payment intent {payment_intent.id}: {e}")
     # Respond to the event
     return '', 200
 
