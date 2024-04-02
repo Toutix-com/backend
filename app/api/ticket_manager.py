@@ -63,7 +63,10 @@ class TicketManager:
             'error': 'Not enough tickets available'
             }
             ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, EventID=event_id, CategoryID=CategoryID, Status=StatusEnum.Available, initialPrice=initialPrice)
+            # Ticket sales tracking
             category.ticket_sold += 1
+            event.ticket_sales += 1 # everytime a ticket is bought, the total count is added
+            event.total_revenue += initialPrice # everytime a ticket is bought, the initial price is added
             db.session.add(ticket)
 
         db.session.commit()
@@ -101,6 +104,13 @@ class TicketManager:
         ticket.Status = StatusEnum.Sold
         ticket.price = price
         ticket.TransactionID = transaction.TransactionID
+
+        # Ticket sales tracking
+        event.resold_tickets += 1
+        event.total_resold_revenue += price - ticket.initialPrice # Total resale revenue is the difference between the price of the ticket and the initial price
+        revenu_share = (price - ticket.initialPrice) * 0.4
+        event.resold_revenue_share_to_business += revenu_share # Business gets 40% of the resale revenue
+        event.total_revenue += revenu_share # Total revenue is the 40% of the resale revenue + primary ticket sales revenue
 
         db.session.commit()
 

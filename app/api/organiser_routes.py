@@ -13,7 +13,7 @@ def ticket_info(event_id):
     if not event:
         return jsonify({'message': 'Event not found'}), 404
     
-    total_tickets_sold = sum(category.ticket_sold for category in TicketCategory.query.filter_by(EventID=event_id))
+    total_tickets_sold = event.ticket_sales
     total_tickets = sum(category.max_limit for category in TicketCategory.query.filter_by(EventID=event_id))
     # Attendee List
     attendee_list = Ticket.query.join(User).filter(Ticket.EventID == event_id, Ticket.UserID == User.UserID).add_columns(User.FirstName, User.LastName, User.Email, Ticket.CreationDate, Ticket.Status, Ticket.TransactionID).all()
@@ -28,6 +28,32 @@ def ticket_info(event_id):
     }
 
     return jsonify(response), 200
+
+@organiser_routes.route('/<event_id>/sales_info', methods=['GET'])
+def sales_info(event_id):
+    event = Event.query.filter_by(EventID=event_id).first()
+    if not event:
+        return jsonify({'message': 'Event not found'}), 404
+    return jsonify({}), 200
+
+    total_tickets_sold = event.ticket_sales
+    resold_tickets = event.resold_tickets
+    total_resolved_revenue = event.total_resold_revenue
+    resold_revenue_share_to_business = event.resold_revenue_share_to_business
+    total_revenue = event.total_revenue
+
+    response = {
+        'Total Tickets Sold': total_tickets_sold,
+        'Resold Tickets': resold_tickets,
+        'Total Resold Revenue': total_resolved_revenue,
+        'Resold Revenue Share to Business': resold_revenue_share_to_business,
+        'Total Revenue': total_revenue
+    }
+
+    return jsonify(response), 200
+
+
+
 
 
 
