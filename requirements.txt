@@ -28,3 +28,4 @@ Werkzeug==2.2.3
 WTForms==3.0.1
 Flask-JWT-Extended==4.6.0
 stripe==8.3.0
+postmarker==1.0.0

@@ -44,7 +44,7 @@ class OTPManager:
         self.otp, self.expiry = self.generate_store_otp()
         expiry_iso = datetime.fromtimestamp(self.expiry, timezone.utc).isoformat()
         # email = "zhangdaniel0120@gmail.com"
-        send_email = "noreplay@toutix.com"
+        send_email = "noreply@toutix.com"
 
         subject = "Your OTP with Toutix"
         message = f"Your OTP is{self.otp} \n\n The expiry on that is {expiry_iso}"
@@ -62,24 +62,17 @@ class OTPManager:
             #     HtmlBody=message
             # )
             # use template
+            # Username: 用户邮箱号
+            # supportemail：dillane@toutix.com
+            # company_name: toutix
+            # company_address: Durham Univeristy, Venture Lab. DH1 3SG
+
             postmark.emails.send_with_template(
                 TemplateId=35527163,
                 TemplateModel={
-                    "product_url": "toutix",
-                    "product_name": "toutix",
-                    "name": "toutix",
-                    "action_url": "toutix",
-                    "login_url": "toutix",
-                    "username": "toutix",
-                    "trial_length": "toutix",
-                    "trial_start_date": "toutix",
-                    "trial_end_date": "toutix",
-                    "support_email": "toutix",
-                    "live_chat_url": "toutix",
-                    "sender_name": "toutix",
-                    "help_url": "toutix",
-                    "company_name": "toutix",
-                    "company_address": "toutix"
+                    "otp": self.otp,
+                    "expiry_date": self.expiry,
+                    "username": self.email,
                 },
                 From=send_email,
                 To=self.email,
