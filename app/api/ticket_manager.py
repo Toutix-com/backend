@@ -6,6 +6,8 @@ from app.model import User, db, Event, Transaction, Ticket, TicketCategory, Stat
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 from app.api.auth import token_required
+from postmarker.core import PostmarkClient
+from datetime import datetime
 
 ticket_routes = Blueprint('ticket', __name__)
 
@@ -71,12 +73,56 @@ class TicketManager:
 
         db.session.commit()
 
+        # Send confirmation email
+        self.send_confirmation(event.Name, event.DateTime, event.location, quantity, user, user.Email)
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         print(f"Transaction token: {token}")
 
         return token
     
+    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email):
+        SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
+        ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
+        # Send the OTP to the email address
+        # Return json message to frontend
+        send_email = "noreply@toutix.com"
+
+        subject = "Booking confirmation & Ticket for {event_name}"
+
+        text = f"Subject: {subject} \n\n {message}"
+
+        # Separate datetime
+        datetime_obj = datetime.strptime(event_DateTime, '%Y-%m-%d %H:%M:%S')
+        date = datetime_obj.date()
+        time = datetime_obj.time()
+
+        try:
+
+            postmark = PostmarkClient(server_token=SERVER_TOKEN, account_token=ACCOUNT_TOKEN)
+
+            postmark.emails.send_with_template(
+                TemplateId=35544926,
+                TemplateModel={
+                    "Event Name": event_name,
+                    "Event Date": date,
+                    "Event Time": time,
+                    "Event Location": event_location,
+                    "Ticket Number": ticket_number,
+                    "User": user.FirstName
+                },
+                From=send_email,
+                To=email,
+            )
+            return jsonify({
+                "message": f"Confirmation email sent successfully to {email}"
+            })
+        except Exception as e:
+            return jsonify({"message": "Error"}), 404
+        finally:
+            # server.quit()
+            pass
+
     def purchase_ticket_marketplace(self, sellerID, event_id, paymentmethod_id, price, ticket_id):
         user = User.query.get(self.userID)
         seller = User.query.get(sellerID)
