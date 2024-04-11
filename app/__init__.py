@@ -26,7 +26,7 @@ jwts = JWTManager(app)
 
 login = LoginManager(app)
 login.login_view = 'auth.unauthorized'
-
+app.run()
 @app.route("/api/docs")
 def api_index():
     acceptable_methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']

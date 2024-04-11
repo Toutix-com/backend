@@ -72,8 +72,9 @@ def login():
     else:
         otp_manager = OTPManager(email)
         otp_manager.generate_store_otp()
-        if otp_manager.send_otp():
-            return otp_manager.send_otp(), 200
+        send_otp = otp_manager.send_otp()
+        if send_otp:
+            return send_otp
         else:
             return jsonify({"error": "Failed to send OTP."}), 400
 

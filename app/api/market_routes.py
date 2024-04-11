@@ -33,7 +33,8 @@ def get_events_with_tickets_on_marketplace():
 
     if tickets:
         event_ids = [ticket.EventID for ticket in tickets]
-        events = Event.query.filter(Event.EventID.in_(event_ids)).all()
+        current_time = datetime.now()
+        events = Event.query.filter(Event.EventID.in_(event_ids), Event.DateTime > current_time).all()
 
         if events:
             formatted_events = [event.to_dict() for event in events]
@@ -48,8 +49,12 @@ def get_market_by_id(event_id):
     tickets = Ticket.query.filter(Ticket.EventID==event_id, Ticket.Status== StatusEnum.ListedonMarketplace).all()
 
     if tickets:
-        formatted_tickets = [ticket.to_dict() for ticket in tickets]
-        return jsonify({'tickets': formatted_tickets})
+        current_time = datetime.now()
+        formatted_tickets = [ticket.to_dict() for ticket in tickets if ticket.Event.DateTime > current_time]
+        if formatted_tickets:
+            return jsonify({'tickets': formatted_tickets})
+        else:
+            return jsonify({'message': 'No future tickets found for this event'}), 404
     else:
         return jsonify({'message': 'No tickets found for this event'}), 404
     

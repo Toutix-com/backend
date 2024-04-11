@@ -3,6 +3,7 @@ from app.model import Event, Location,db, Ticket, TicketCategory, User
 from sqlalchemy import or_
 from sqlalchemy import func
 from app.api.auth import token_required
+from datetime import datetime
 
 event_routes = Blueprint('events', __name__)
 
@@ -21,11 +22,14 @@ def get_events():
     events = Event.query.all()  # Exclude the event by its UUID
 
   formatted_events = []
+  current_time = datetime.now()
+
   for event in events:
-    event_dict = event.to_dict()
-    cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event.EventID).scalar()
-    event_dict['cheapest_ticket_price'] = cheapest_ticket_price if cheapest_ticket_price else 0
-    formatted_events.append(event_dict)
+    if event.DateTime > current_time:
+        event_dict = event.to_dict()
+        cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event.EventID).scalar()
+        event_dict['cheapest_ticket_price'] = cheapest_ticket_price if cheapest_ticket_price else 0
+        formatted_events.append(event_dict)
 
   return jsonify({"events": formatted_events})
 
@@ -34,6 +38,10 @@ def get_event_by_id(event_id):
   event = Event.query.filter_by(EventID=event_id).first()
 
   if event:
+    current_time = datetime.now()
+    if event.DateTime < current_time:  # Check if the event is in the past
+        return jsonify({'error': 'Event has already passed'}), 400
+    
     cheapest_ticket_price = db.session.query(func.min(TicketCategory.price)).filter(TicketCategory.EventID == event_id).scalar()
 
     if cheapest_ticket_price is None:
