@@ -42,7 +42,7 @@ class OTPManager:
         # Send the OTP to the email address
         # Return json message to frontend
         self.otp, self.expiry = self.generate_store_otp()
-        expiry_iso = datetime.fromtimestamp(self.expiry, timezone.utc).isoformat()
+        expiry_iso = datetime.fromtimestamp(self.expiry, timezone.utc).strftime("%m-%d %H:%M:%S")
         # email = "zhangdaniel0120@gmail.com"
         send_email = "noreply@toutix.com"
 
@@ -71,7 +71,7 @@ class OTPManager:
                 TemplateId=35527163,
                 TemplateModel={
                     "otp": self.otp,
-                    "expiry_date": self.expiry,
+                    "expiry_date": expiry_iso,
                     "username": self.email,
                 },
                 From=send_email,
@@ -116,3 +116,53 @@ class OTPManager:
             }), 200
         else:
             return jsonify({"error": "Invalid OTP. Please try again."}), 400
+        
+
+    
+    def send_confirmation(self):
+        # 在这里写发送otp的逻辑
+        # Send the OTP to the email address
+        # Return json message to frontend
+        send_email = "noreply@toutix.com"
+
+        subject = "Booking confirmation & Ticket for {event_name}"
+
+        text = f"Subject: {subject} \n\n {message}"
+
+        try:
+
+            postmark = PostmarkClient(server_token=self.SERVER_TOKEN, account_token=self.ACCOUNT_TOKEN)
+            # template = postmark.templates.get(35527163)
+            # postmark.emails.send(
+            #     From=send_email,
+            #     To=self.email,
+            #     Subject=subject,
+            #     HtmlBody=message
+            # )
+            # use template
+            # Username: 用户邮箱号
+            # supportemail：dillane@toutix.com
+            # company_name: toutix
+            # company_address: Durham Univeristy, Venture Lab. DH1 3SG
+
+            postmark.emails.send_with_template(
+                TemplateId=35527163,
+                TemplateModel={
+                    "otp": self.otp,
+                    "expiry_date": self.expiry,
+                    "username": self.email,
+                },
+                From=send_email,
+                To=self.email,
+            )
+            return jsonify({
+                "message": f"OTP sent successfully to {self.email}",
+                "otp_expiry": expiry_iso,
+                "otp": self.otp
+            })
+        except Exception as e:
+            return jsonify({"message": "Error"}), 404
+        finally:
+            # server.quit()
+            pass
+
