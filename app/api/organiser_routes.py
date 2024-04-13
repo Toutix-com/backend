@@ -21,10 +21,10 @@ def ticket_info( event_id):
             'CategoryID': str(category.CategoryID),
             'Name': category.name,
             'Price': category.price,
-            'Max Limit': category.max_limit,
-            'Tickets Sold': category.ticket_sold,
-            'Tickets Left': category.max_limit - category.ticket_sold,
-            'Max Per Person': category.max_per_person,
+            'Max_Limit': category.max_limit,
+            'Tickets_Sold': category.ticket_sold,
+            'Tickets_Left': category.max_limit - category.ticket_sold,
+            'Max_Per_Person': category.max_per_person,
             'highest_bid': category.price*3,
             'lowest_resold': category.price/2,
             'highest_resold': category.price*2
@@ -42,14 +42,15 @@ def ticket_info( event_id):
     total_revenu = event.total_revenue
 
     response = {
-        'Total Tickets': total_tickets,
-        'Total Tickets Sold': total_tickets_sold,
+        'Total_Tickets': total_tickets,
+        'Total_Tickets_Sold': total_tickets_sold,
         'Categories': categories_info,
+        'attendee_list': attendee_list,
         #'Attendee List': [{'FirstName': attendee.User.FirstName, 'LastName': attendee.User.LastName, 'Email': attendee.User.Email} for attendee in attendee_list],
-        'Resold Tickets': resold_tickets,
-        'Total Resold Revenue': total_resold_revenue,
-        'Resold Revenue Share to Business': resold_revenu_share_to_business,
-        'Total Revenue': total_revenu
+        'Resold_Tickets': resold_tickets,
+        'Total_Resold_Revenue': total_resold_revenue,
+        'Resold_Revenue_Share_to_Business': resold_revenu_share_to_business,
+        'Total_Revenue': total_revenu
 
     }
 
