@@ -41,7 +41,7 @@ def ticket_info( event_id):
     resold_revenu_share_to_business = event.resold_revenue_share_to_business
     total_revenu = event.total_revenue
 
-    print(attendee_list)
+    print('attendee list', attendee_list)
     response = {
         'Total_Tickets': total_tickets,
         'Total_Tickets_Sold': total_tickets_sold,
