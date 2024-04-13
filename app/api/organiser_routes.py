@@ -42,6 +42,7 @@ def ticket_info( event_id):
     total_revenu = event.total_revenue
 
     print('attendee list', attendee_list)
+    print('Attendee List', [{'FirstName': attendee.User.FirstName, 'LastName': attendee.User.LastName, 'Email': attendee.User.Email, 'CreationDate': attendee.CreationDate.isoformat(), 'Status': attendee.Status, 'TransactionID': str(attendee.TransactionID)} for attendee in attendee_list])
     response = {
         'Total_Tickets': total_tickets,
         'Total_Tickets_Sold': total_tickets_sold,
