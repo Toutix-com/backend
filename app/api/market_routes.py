@@ -51,7 +51,7 @@ def get_market_by_id(event_id):
 
     if tickets:
         current_time = datetime.now()
-        formatted_tickets = [ticket.to_dict() for ticket in tickets if ticket.Event.DateTime > current_time]
+        formatted_tickets = [ticket.to_dict() for ticket in tickets]
         if formatted_tickets:
             return jsonify({'tickets': formatted_tickets})
         else:
