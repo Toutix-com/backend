@@ -90,8 +90,6 @@ class TicketManager:
 
         subject = "Booking confirmation & Ticket for {event_name}"
 
-        text = f"Subject: {subject} \n\n {message}"
-
         # Separate datetime
         datetime_obj = datetime.strptime(event_DateTime, '%Y-%m-%d %H:%M:%S')
         date = datetime_obj.date()

@@ -4,6 +4,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from app.api.auth import token_required
 from decimal import Decimal
+from datetime import datetime
 
 market_routes = Blueprint('markets', __name__)
 
