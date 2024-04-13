@@ -68,7 +68,7 @@ class TicketManager:
             # Ticket sales tracking
             category.ticket_sold += 1
             event.ticket_sales += 1 # everytime a ticket is bought, the total count is added
-            event.total_revenue += initialPrice # everytime a ticket is bought, the initial price is added
+            event.total_revenue += int(initialPrice) # everytime a ticket is bought, the initial price is added
             db.session.add(ticket)
 
         db.session.commit()

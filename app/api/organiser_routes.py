@@ -7,8 +7,7 @@ from sqlalchemy import func
 organiser_routes = Blueprint('organiser', __name__)
 
 @organiser_routes.route('/<event_id>/ticket_info', methods=['GET'])
-def ticket_info(event_id):
-    
+def ticket_info( event_id):
     event = Event.query.filter_by(EventID=event_id).first()
     if not event:
         return jsonify({'message': 'Event not found'}), 404
