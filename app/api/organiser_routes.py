@@ -41,8 +41,11 @@ def ticket_info( event_id):
     resold_revenu_share_to_business = event.resold_revenue_share_to_business
     total_revenu = event.total_revenue
 
-    print('attendee list', attendee_list)
-    print('Attendee List', [
+    response = {
+        'Total_Tickets': total_tickets,
+        'Total_Tickets_Sold': total_tickets_sold,
+        'Categories': categories_info,
+        'Attendee List':  [
     {
         'TicketID': str(item[0]),
         'FirstName': item[1],
@@ -54,12 +57,7 @@ def ticket_info( event_id):
         'TicketCategory': item[7]
     }
     for item in attendee_list
-])
-    response = {
-        'Total_Tickets': total_tickets,
-        'Total_Tickets_Sold': total_tickets_sold,
-        'Categories': categories_info,
-        #'Attendee List': [{'FirstName': attendee.User.FirstName, 'LastName': attendee.User.LastName, 'Email': attendee.User.Email} for attendee in attendee_list],
+],
         'Resold_Tickets': resold_tickets,
         'Total_Resold_Revenue': total_resold_revenue,
         'Resold_Revenue_Share_to_Business': resold_revenu_share_to_business,
