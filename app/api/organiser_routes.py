@@ -45,7 +45,7 @@ def ticket_info( event_id):
         'Total Tickets': total_tickets,
         'Total Tickets Sold': total_tickets_sold,
         'Categories': categories_info,
-        'Attendee List': [{'FirstName': attendee.User.FirstName, 'LastName': attendee.User.LastName, 'Email': attendee.User.Email, 'CreationDate': attendee.CreationDate.isoformat(), 'Status': attendee.Status, 'TransactionID': str(attendee.TransactionID)} for attendee in attendee_list],
+        'Attendee List': [{'FirstName': attendee.User.FirstName, 'LastName': attendee.User.LastName, 'Email': attendee.User.Email} for attendee in attendee_list],
         'Resold Tickets': resold_tickets,
         'Total Resold Revenue': total_resold_revenue,
         'Resold Revenue Share to Business': resold_revenu_share_to_business,

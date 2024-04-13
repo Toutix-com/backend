@@ -91,7 +91,7 @@ class TicketManager:
         subject = "Booking confirmation & Ticket for {event_name}"
 
         # Separate datetime
-        datetime_obj = datetime.strptime(event_DateTime, '%Y-%m-%d %H:%M:%S')
+        datetime_obj = datetime.strptime(str(event_DateTime), '%Y-%m-%d %H:%M:%S')
         date = datetime_obj.date()
         time = datetime_obj.time()
 
