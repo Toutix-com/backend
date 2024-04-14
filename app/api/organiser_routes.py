@@ -53,8 +53,7 @@ def ticket_info( event_id):
         'Email': item[3],
         'CreationDate': item[4].isoformat(),
         'Status': 'Used' if item[5] else 'Not Used',
-        'TransactionID': str(item[6]),
-        'TicketCategory': item[7]
+        'TransactionID': str(item[6])
     }
     for item in attendee_list
 ],
