@@ -34,7 +34,7 @@ def ticket_info( event_id):
     total_tickets_sold = event.ticket_sales
     total_tickets = sum(category.max_limit for category in TicketCategory.query.filter_by(EventID=event_id))
     # Attendee List
-    attendee_list = Ticket.query.join(User).filter(Ticket.EventID == event_id, Ticket.UserID == User.UserID).add_columns(User.FirstName, User.LastName, User.Email, Ticket.CreationDate, Ticket.QR_STATUS, Ticket.TransactionID).all()
+    attendee_list = Ticket.query.join(User).join(TicketCategory).filter(Ticket.EventID == event_id, Ticket.UserID == User.UserID).add_columns(User.FirstName, User.LastName, User.Email, Ticket.CreationDate, Ticket.QR_STATUS, Ticket.TransactionID, TicketCategory.name).all()
     # Resold tickets
     resold_tickets = event.resold_tickets
     total_resold_revenue = event.total_resold_revenue
@@ -53,7 +53,8 @@ def ticket_info( event_id):
         'Email': item[3],
         'CreationDate': item[4].isoformat(),
         'Status': 'Used' if item[5] else 'Not Used',
-        'TransactionID': str(item[6])
+        'TransactionID': str(item[6]),
+        'TicketCategory': item[7]
     }
     for item in attendee_list
 ],
