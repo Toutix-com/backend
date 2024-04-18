@@ -106,7 +106,7 @@ class TicketManager:
                     "Event Date": date,
                     "Event Time": time,
                     "Event Location": event_location,
-                    "Ticket Number": ticket_number,
+                    "Ticket number": ticket_number,
                     "User": user.FirstName
                 },
                 From=send_email,
@@ -120,6 +120,23 @@ class TicketManager:
         finally:
             # server.quit()
             pass
+    
+    def generate_qr_code(ticket_id, event_name, attendee_name):
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr_data = f"Ticket ID: {ticket_id}\nEvent: {event_name}\nAttendee: {attendee_name}"
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+
+        qr_img = qr.make_image(fill_color="black", back_color="white")
+        qr_img.save(f"ticket_{ticket_id}_qr.png")
+        return qr_img
+    
+
 
     def purchase_ticket_marketplace(self, sellerID, event_id, paymentmethod_id, price, ticket_id):
         user = User.query.get(self.userID)
@@ -163,6 +180,8 @@ class TicketManager:
         print(f"Transaction token: {token}")
 
         return token
+    
+
 
     def modify_ticket(self, ticket_id, new_owner_email):
         ticket = Ticket.query.get(ticket_id)
