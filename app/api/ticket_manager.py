@@ -39,6 +39,47 @@ class TicketManager:
     def __init__(self, user_id):
         self.userID = user_id
 
+    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email):
+        SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
+        ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
+        # Send the OTP to the email address
+        # Return json message to frontend
+        send_email = "noreply@toutix.com"
+
+        subject = "Booking confirmation & Ticket for {event_name}"
+
+        print('Date: ', event_DateTime)
+        # Separate datetime
+        datetime_obj = datetime.strptime(str(event_DateTime), '%Y-%m-%d %H:%M:%S')
+        date = datetime_obj.date()
+        time = datetime_obj.time()
+        print(date, time)
+        try:
+
+            postmark = PostmarkClient(server_token=SERVER_TOKEN, account_token=ACCOUNT_TOKEN)
+
+            postmark.emails.send_with_template(
+                TemplateId=35544926,
+                TemplateModel={
+                    "Event Name": event_name,
+                    "Event Date": date,
+                    "Event Time": time,
+                    "Event Location": event_location,
+                    "Ticket number": ticket_number,
+                    "User": user.FirstName
+                },
+                From=send_email,
+                To=email,
+            )
+            return jsonify({
+                "message": f"Confirmation email sent successfully to {email}"
+            })
+        except Exception as e:
+            return jsonify({"message": "Error"}), 404
+        finally:
+            # server.quit()
+            pass
+
     def purchase_ticket(self, event_id, quantity, paymentmethod_id, TransactionAmount, CategoryID, initialPrice):
         user = User.query.get(self.userID)
         category = TicketCategory.query.get(CategoryID)
@@ -71,55 +112,18 @@ class TicketManager:
             event.total_revenue += int(float(initialPrice)) # everytime a ticket is bought, the initial price is added
             db.session.add(ticket)
 
+        print('Commit to DB')
         db.session.commit()
 
         # Send confirmation email
+        print('Sending confirmation email...')
         self.send_confirmation(event.Name, event.DateTime, event.location, quantity, user, user.Email)
+        print('Confirmation email sent!')
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         print(f"Transaction token: {token}")
 
         return token
-    
-    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email):
-        SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
-        ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
-        # Send the OTP to the email address
-        # Return json message to frontend
-        send_email = "noreply@toutix.com"
-
-        subject = "Booking confirmation & Ticket for {event_name}"
-
-        # Separate datetime
-        datetime_obj = datetime.strptime(str(event_DateTime), '%Y-%m-%d %H:%M:%S')
-        date = datetime_obj.date()
-        time = datetime_obj.time()
-
-        try:
-
-            postmark = PostmarkClient(server_token=SERVER_TOKEN, account_token=ACCOUNT_TOKEN)
-
-            postmark.emails.send_with_template(
-                TemplateId=35544926,
-                TemplateModel={
-                    "Event Name": event_name,
-                    "Event Date": date,
-                    "Event Time": time,
-                    "Event Location": event_location,
-                    "Ticket number": ticket_number,
-                    "User": user.FirstName
-                },
-                From=send_email,
-                To=email,
-            )
-            return jsonify({
-                "message": f"Confirmation email sent successfully to {email}"
-            })
-        except Exception as e:
-            return jsonify({"message": "Error"}), 404
-        finally:
-            # server.quit()
-            pass
     
     def generate_qr_code(ticket_id, event_name, attendee_name):
         qr = qrcode.QRCode(
