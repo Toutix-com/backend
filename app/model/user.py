@@ -15,6 +15,8 @@ class User(db.Model):
     last_login = db.Column(db.DateTime, nullable=True)
     Token = db.Column(db.String(500), nullable=True)
     Birthday = db.Column(db.Date, nullable=True)
+    Credit = db.Column(db.Integer, default=0)
+
     
     # Relationships
     tickets = db.relationship('Ticket', backref='user_tickets', lazy=True) # This is a one-to-many relationship, eg a user can have many tickets
@@ -34,6 +36,7 @@ class User(db.Model):
             'PhoneNumber': self.PhoneNumber,
             'tickets': [ticket.to_dict() for ticket in self.tickets] if self.tickets else [],
             'Birthday': self.Birthday.isoformat() if self.Birthday else None,  # Convert to ISO 8601 string format
+            'Credit': self.Credit
             #'transactions_as_buyer': [transaction.to_dict() for transaction in self.transactions_as_buyer] if self.transactions_as_buyer else [],
             #'transactions_as_seller': [transaction.to_dict() for transaction in self.transactions_as_seller] if self.transactions_as_seller else [],
         }
