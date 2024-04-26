@@ -79,7 +79,7 @@ class TicketManager:
                 "message": f"Confirmation email sent successfully to {email}"
             })
         except Exception as e:
-            return jsonify({"message": "Error"}), 404
+            return jsonify({"message": "Error" + str(e)}), 404
         finally:
             # server.quit()
             pass

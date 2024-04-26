@@ -67,7 +67,7 @@ class OTPManager:
             # company_name: toutix
             # company_address: Durham Univeristy, Venture Lab. DH1 3SG
 
-            email_res =postmark.emails.send_with_template(
+            email_res = postmark.emails.send_with_template(
                 TemplateId=35527163,
                 TemplateModel={
                     "otp": self.otp,
