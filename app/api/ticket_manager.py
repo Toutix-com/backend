@@ -64,11 +64,11 @@ class TicketManager:
             postmark.emails.send_with_template(
                 TemplateId=35544926,
                 TemplateModel={
-                    "Event Name": event_name,
-                    "Event Date": date,
-                    "Event Time": time,
-                    "Event Location": event_location,
-                    "Ticket number": ticket_number,
+                    "Event_Name": event_name,
+                    "Event_Date": date,
+                    "Event_Time": time,
+                    "Event_Location": event_location,
+                    "Ticket_number": ticket_number,
                     "User": user.FirstName
                 },
                 From=send_email,
