@@ -45,12 +45,9 @@ class TicketManager:
         self.ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
 
     def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email):
-        SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
-        ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
         # Send the OTP to the email address
         # Return json message to frontend
         send_email = "noreply@toutix.com"
-
         subject = "Booking confirmation & Ticket for {event_name}"
 
         print('Date: ', event_DateTime)
@@ -79,6 +76,7 @@ class TicketManager:
                 "message": f"Confirmation email sent successfully to {email}"
             })
         except Exception as e:
+            print(e)
             return jsonify({"message": "Error" + str(e)}), 404
         finally:
             # server.quit()
