@@ -41,6 +41,8 @@ def get_ticket_by_ids(current_user, ticket_id):
 class TicketManager:
     def __init__(self, user_id):
         self.userID = user_id
+        self.SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
+        self.ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
 
     def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email):
         SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
@@ -58,18 +60,16 @@ class TicketManager:
         time = datetime_obj.time()
         print(date, time)
         try:
-
-            postmark = PostmarkClient(server_token=SERVER_TOKEN, account_token=ACCOUNT_TOKEN)
-
+            postmark = PostmarkClient(server_token=self.SERVER_TOKEN, account_token=self.ACCOUNT_TOKEN)
             email_res = postmark.emails.send_with_template(
                 TemplateId=35544926,
                 TemplateModel={
                     "Event_Name": event_name,
+                    "User": user.FirstName,
                     "Event_Date": date,
-                    "Event_Time": time,
                     "Event_Location": event_location,
+                    "Event_Time": time,
                     "Ticket_number": ticket_number,
-                    "User": user.FirstName
                 },
                 From=send_email,
                 To=email,
