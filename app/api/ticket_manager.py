@@ -61,7 +61,7 @@ class TicketManager:
 
             postmark = PostmarkClient(server_token=SERVER_TOKEN, account_token=ACCOUNT_TOKEN)
 
-            postmark.emails.send_with_template(
+            email_res = postmark.emails.send_with_template(
                 TemplateId=35544926,
                 TemplateModel={
                     "Event_Name": event_name,
@@ -74,6 +74,7 @@ class TicketManager:
                 From=send_email,
                 To=email,
             )
+            print(email_res)
             return jsonify({
                 "message": f"Confirmation email sent successfully to {email}"
             })
@@ -130,20 +131,20 @@ class TicketManager:
 
         return token
 
-    def generate_qr_code(ticket_id, event_name, attendee_name):
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr_data = f"Ticket ID: {ticket_id}\nEvent: {event_name}\nAttendee: {attendee_name}"
-        qr.add_data(qr_data)
-        qr.make(fit=True)
-
-        qr_img = qr.make_image(fill_color="black", back_color="white")
-        qr_img.save(f"ticket_{ticket_id}_qr.png")
-        return qr_img
+    # def generate_qr_code(ticket_id, event_name, attendee_name):
+    #     qr = qrcode.QRCode(
+    #         version=1,
+    #         error_correction=qrcode.constants.ERROR_CORRECT_L,
+    #         box_size=10,
+    #         border=4,
+    #     )
+    #     qr_data = f"Ticket ID: {ticket_id}\nEvent: {event_name}\nAttendee: {attendee_name}"
+    #     qr.add_data(qr_data)
+    #     qr.make(fit=True)
+    #
+    #     qr_img = qr.make_image(fill_color="black", back_color="white")
+    #     qr_img.save(f"ticket_{ticket_id}_qr.png")
+    #     return qr_img
 
     def purchase_ticket_marketplace(self, sellerID, event_id, paymentmethod_id, price, ticket_id):
         user = User.query.get(self.userID)
