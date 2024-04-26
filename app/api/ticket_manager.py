@@ -64,7 +64,7 @@ class TicketManager:
                     "Event_Name": event_name,
                     "User": user.FirstName,
                     "Event_Date": date.strftime('%Y-%m-%d %H:%M:%S %f'),
-                    "Event_Location": event_location,
+                    "Event_Location": str(event_location),
                     "Event_Time": time,
                     "Ticket_number": ticket_number,
                 },
