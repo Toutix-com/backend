@@ -28,11 +28,11 @@ def charge(current_user):
 
     # if user has more than 4 tickets for the same eventid, return error
     user_tickets = Ticket.query.filter_by(UserID=user_id, EventID=event_id).all()
-    if len(user_tickets) + number_of_tickets > 4:
-        return jsonify({"error": "You can only purchase a maximum of 4 tickets for the same event."}), 400
+    ticket_category = TicketCategory.query.get(ticket_category_id)
+    if len(user_tickets) + number_of_tickets > ticket_category.max_per_person:
+        return jsonify({"error": "You have reached the maximum ticket allowed for the same event."}), 400
     
     # Check inventory to see if there are enough tickets
-    ticket_category = TicketCategory.query.get(ticket_category_id)
     if ticket_category.ticket_sold + number_of_tickets > ticket_category.max_limit:
         return jsonify({"error": "Not enough tickets available"}), 400
     

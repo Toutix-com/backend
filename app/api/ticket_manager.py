@@ -63,9 +63,9 @@ class TicketManager:
                 TemplateModel={
                     "Event_Name": event_name,
                     "User": user.FirstName,
-                    "Event_Date": date.strftime('%Y-%m-%d %H:%M:%S %f'),
+                    "Event_Date": date.strftime('%Y-%m-%d'),
                     "Event_Location": str(event_location),
-                    "Event_Time": time,
+                    "Event_Time": time.strftime('%H:%M:%S'),
                     "Ticket_number": ticket_number,
                 },
                 From=send_email,
