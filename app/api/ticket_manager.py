@@ -11,6 +11,7 @@ from datetime import datetime
 
 ticket_routes = Blueprint('ticket', __name__)
 
+
 @ticket_routes.route('/<ticket_id>/validate', methods=['POST'])
 @token_required
 def validate_ticket(current_user, ticket_id):
@@ -25,6 +26,7 @@ def validate_ticket(current_user, ticket_id):
     else:
         return jsonify({'Success': False}), 200
 
+
 @ticket_routes.route('/<ticket_id>', methods=['GET'])
 @token_required
 def get_ticket_by_ids(current_user, ticket_id):
@@ -34,6 +36,7 @@ def get_ticket_by_ids(current_user, ticket_id):
         return ticket.to_dict()
     else:
         return jsonify({'error': 'Ticket not found'}), 404
+
 
 class TicketManager:
     def __init__(self, user_id):
@@ -91,40 +94,42 @@ class TicketManager:
 
         if event is None:
             return jsonify({'error': 'Event not found'}), 404
-        
+
         # Add all the data into the transaction table, and then add the tickets into the ticket table
         # if its a marketplace listing, then there is a sellerID, if not, then there is no sellerID
-        
-        transaction = Transaction(BuyerID= self.userID, PaymentMethodID=paymentmethod_id, TransactionAmount=TransactionAmount, EventID=event_id, TransactionDate=date)
+
+        transaction = Transaction(BuyerID=self.userID, PaymentMethodID=paymentmethod_id,
+                                  TransactionAmount=TransactionAmount, EventID=event_id, TransactionDate=date)
         db.session.add(transaction)
         db.session.flush()
-        
+
         # Assuming that there is available tickets in the inventory
         for _ in range(int(quantity)):
             if category.ticket_sold >= category.max_limit:
                 return {
-            'error': 'Not enough tickets available'
-            }
-            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, EventID=event_id, CategoryID=CategoryID, Status=StatusEnum.Available, initialPrice=initialPrice)
+                    'error': 'Not enough tickets available'
+                }
+            ticket = Ticket(TransactionID=transaction.TransactionID, UserID=self.userID, EventID=event_id,
+                            CategoryID=CategoryID, Status=StatusEnum.Available, initialPrice=initialPrice)
             # Ticket sales tracking
             category.ticket_sold += 1
-            event.ticket_sales += 1 # everytime a ticket is bought, the total count is added
-            event.total_revenue += int(float(initialPrice)) # everytime a ticket is bought, the initial price is added
+            event.ticket_sales += 1  # everytime a ticket is bought, the total count is added
+            event.total_revenue += int(float(initialPrice))  # everytime a ticket is bought, the initial price is added
             db.session.add(ticket)
 
         print('Commit to DB')
         db.session.commit()
 
         # Send confirmation email
-        print('Sending confirmation email...')
+        print('Sending confirmation email...' + str(user.Email))
         self.send_confirmation(event.Name, event.DateTime, event.location, quantity, user, user.Email)
-        print('Confirmation email sent!')
+        print('Confirmation email sent!' + str(user.Email))
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
         print(f"Transaction token: {token}")
 
         return token
-    
+
     def generate_qr_code(ticket_id, event_name, attendee_name):
         qr = qrcode.QRCode(
             version=1,
@@ -139,17 +144,15 @@ class TicketManager:
         qr_img = qr.make_image(fill_color="black", back_color="white")
         qr_img.save(f"ticket_{ticket_id}_qr.png")
         return qr_img
-    
-
 
     def purchase_ticket_marketplace(self, sellerID, event_id, paymentmethod_id, price, ticket_id):
         user = User.query.get(self.userID)
         seller = User.query.get(sellerID)
         ticket = Ticket.query.get(ticket_id)
-        
+
         if user is None or seller is None:
             return jsonify({'error': 'User or seller not found'}), 404
-        
+
         if ticket is None:
             return jsonify({'error': 'Ticket not found'}), 404
 
@@ -157,10 +160,11 @@ class TicketManager:
         event = Event.query.get(event_id)
 
         if event is None:
-            return jsonify({'error': 'Event not found'}), 404     
-        
-        # keep sellerid null for now
-        transaction = Transaction(BuyerID= self.userID, SellerID=sellerID, PaymentMethodID=paymentmethod_id, TransactionAmount=price, EventID=event_id, TransactionDate=date)
+            return jsonify({'error': 'Event not found'}), 404
+
+            # keep sellerid null for now
+        transaction = Transaction(BuyerID=self.userID, SellerID=sellerID, PaymentMethodID=paymentmethod_id,
+                                  TransactionAmount=price, EventID=event_id, TransactionDate=date)
         db.session.add(transaction)
         db.session.commit()
 
@@ -172,10 +176,10 @@ class TicketManager:
 
         # Ticket sales tracking
         event.resold_tickets += 1
-        event.total_resold_revenue += price - ticket.initialPrice # Total resale revenue is the difference between the price of the ticket and the initial price
+        event.total_resold_revenue += price - ticket.initialPrice  # Total resale revenue is the difference between the price of the ticket and the initial price
         revenu_share = (price - ticket.initialPrice) * 0.4
-        event.resold_revenue_share_to_business += revenu_share # Business gets 40% of the resale revenue
-        event.total_revenue += revenu_share # Total revenue is the 40% of the resale revenue + primary ticket sales revenue
+        event.resold_revenue_share_to_business += revenu_share  # Business gets 40% of the resale revenue
+        event.total_revenue += revenu_share  # Total revenue is the 40% of the resale revenue + primary ticket sales revenue
 
         db.session.commit()
 
@@ -184,8 +188,6 @@ class TicketManager:
         print(f"Transaction token: {token}")
 
         return token
-    
-
 
     def modify_ticket(self, ticket_id, new_owner_email):
         ticket = Ticket.query.get(ticket_id)
