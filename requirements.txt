@@ -1,5 +1,4 @@
 alembic==1.12.0
-awsebcli
 blinker==1.6.2
 boto3
 botocore
