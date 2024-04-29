@@ -9,6 +9,7 @@ from reportlab.platypus import Image
 import qrcode
 import boto3
 import os
+import json
 
 
 ''' ADD ERROR HANDLING IN THIS CODE, to account for the case where the QR code generation fails, PDF upload failure ..
