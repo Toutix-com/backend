@@ -1,13 +1,13 @@
 from flask import Flask, Blueprint, request, jsonify
 import random
 import string
-from datetime import datetime, timezone
+from datetime import datetime
 from app.model import User, db, Event, Transaction, Ticket, TicketCategory, StatusEnum
 from flask_jwt_extended import create_access_token
-from datetime import timedelta
 from app.api.auth import token_required
 from postmarker.core import PostmarkClient
 from datetime import datetime
+from app.api.storage_utils import *
 
 ticket_routes = Blueprint('ticket', __name__)
 
@@ -44,18 +44,29 @@ class TicketManager:
         self.SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
         self.ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
 
-    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email):
+    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email, ticket_ids, category):
+        
+        # Generate QR codes for each ticket
+        qr_image_buffers = []
+        for ticket_id in ticket_ids:
+            qr_image_buffer = generate_qr_code(event_name, ticket_id, user.FirstName, category.Name)
+            qr_image_buffers.append(qr_image_buffer)
+        
+        # Generate PDF with all the QR codes
+        pdf_content = generate_ticket_pdf(qr_image_buffers, event_name, user.FirstName, event_location, ticket_number)
+        # Convert the PDF content to base64 for attachment
+        pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
+        # Upload the PDF to S3
+        s3_response = upload_to_s3(pdf_content, 'ticketpdfbucket')
         # Send the OTP to the email address
         # Return json message to frontend
         send_email = "noreply@toutix.com"
         subject = "Booking confirmation & Ticket for {event_name}"
 
-        print('Date: ', event_DateTime)
         # Separate datetime
         datetime_obj = datetime.strptime(str(event_DateTime), '%Y-%m-%d %H:%M:%S')
         date = datetime_obj.date()
         time = datetime_obj.time()
-        print(date, time)
         try:
             postmark = PostmarkClient(server_token=self.SERVER_TOKEN, account_token=self.ACCOUNT_TOKEN)
             email_res = postmark.emails.send_with_template(
@@ -70,13 +81,16 @@ class TicketManager:
                 },
                 From=send_email,
                 To=email,
+                Attachments=[{
+                "Name": "ticket_confirmation.pdf",
+                "Content": pdf_content_base64,
+                "ContentType": "application/pdf"
+            }]
             )
-            print(email_res)
             return jsonify({
                 "message": f"Confirmation email sent successfully to {email}"
             })
         except Exception as e:
-            print(e)
             return jsonify({"message": "Error" + str(e)}), 404
         finally:
             # server.quit()
@@ -103,6 +117,7 @@ class TicketManager:
         db.session.flush()
 
         # Assuming that there is available tickets in the inventory
+        ticket_ids = [] # List to store the generated ticket IDs
         for _ in range(int(quantity)):
             if category.ticket_sold >= category.max_limit:
                 return {
@@ -115,17 +130,16 @@ class TicketManager:
             event.ticket_sales += 1  # everytime a ticket is bought, the total count is added
             event.total_revenue += int(float(initialPrice))  # everytime a ticket is bought, the initial price is added
             db.session.add(ticket)
+            db.session.flush()
+            ticket_ids.append(ticket.TicketID)
 
-        print('Commit to DB')
         db.session.commit()
 
         # Send confirmation email
-        print('Sending confirmation email...' + str(user.Email))
-        self.send_confirmation(event.Name, event.DateTime, event.location, quantity, user, user.Email)
+        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, user, user.Email, ticket_ids, category)
         print('Confirmation email sent!' + str(user.Email))
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        print(f"Transaction token: {token}")
 
         return token
 

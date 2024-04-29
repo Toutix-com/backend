@@ -59,7 +59,7 @@ def get_event_by_id(event_id):
             'category_id': category.CategoryID,
             'category_name': category.name,
             'tickets_left': tickets_left,
-            'price': category.price,
+            'price': category.price
         })
 
     return jsonify({'event': formatted_event}), 200
