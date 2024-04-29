@@ -9,7 +9,8 @@ from reportlab.platypus import Image
 import qrcode
 import boto3
 import os
-import json, jsonify
+import json
+from flask import jsonify
 
 
 ''' ADD ERROR HANDLING IN THIS CODE, to account for the case where the QR code generation fails, PDF upload failure ..
