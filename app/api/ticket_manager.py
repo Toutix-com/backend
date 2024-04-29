@@ -74,7 +74,7 @@ class TicketManager:
                 TemplateId=35544926,
                 TemplateModel={
                     "Event_Name": event_name,
-                    "User": user.FirstName,
+                    "User": user.FirstName + " " + user.LastName,
                     "Event_Date": date.strftime('%Y-%m-%d'),
                     "Event_Location": str(event_location),
                     "Event_Time": time.strftime('%H:%M:%S'),

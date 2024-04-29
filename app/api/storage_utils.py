@@ -130,7 +130,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
     :param object_name: S3 object name. If not specified, file_name is used
     :return: True if file was uploaded, else False
     """
-    print('Uploading to S3...')
+    print('Connecting to S3...')
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = file_name
@@ -153,9 +153,8 @@ def upload_to_s3(file_name, bucket, object_name=None):
     except FileNotFoundError:
         print("The file was not found")
         return jsonify({"error": "The file was not found"}), 500
-    except NoCredentialsError:
-        print("Credentials not available")
-        return jsonify({"error": "Credentials not available"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Error uploading file: {str(e)}"}), 500
 
 def download_pdf_from_s3(bucket_name, file_name):
     s3 = boto3.client('s3')
