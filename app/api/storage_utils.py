@@ -118,6 +118,7 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
     pdf_buffer.seek(0)
 
     # Return the PDF data as bytes
+    print('PDF generated successfully')
     return pdf_buffer.getvalue()
 
 def upload_to_s3(file_name, bucket, object_name=None):

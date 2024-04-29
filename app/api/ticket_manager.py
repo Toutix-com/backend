@@ -8,6 +8,7 @@ from app.api.auth import token_required
 from postmarker.core import PostmarkClient
 from datetime import datetime
 from app.api.storage_utils import *
+import base64
 
 ticket_routes = Blueprint('ticket', __name__)
 
