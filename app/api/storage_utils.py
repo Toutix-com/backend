@@ -26,7 +26,7 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
         )
         qr_data = {
             "eventName": event_name,
-            "ticketId": ticket_id,
+            "ticketId": str(ticket_id),
             "user": user.FirstName + " " + user.LastName,
             "ticketCategory": ticket_category
         }
