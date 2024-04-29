@@ -31,7 +31,6 @@ pillow==10.3.0
 postmarker==1.0
 psycopg2-binary==2.9.7
 PyJWT==2.8.0
-pypiwin32==223
 pypng==0.20220715.0
 python-dateutil==2.9.0.post0
 python-dotenv==0.21.1
