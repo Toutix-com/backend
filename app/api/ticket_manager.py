@@ -49,7 +49,7 @@ class TicketManager:
         # Generate QR codes for each ticket
         qr_image_buffers = []
         for ticket_id in ticket_ids:
-            qr_image_buffer = generate_qr_code(event_name, ticket_id, user.FirstName, category.name)
+            qr_image_buffer = generate_qr_code(event_name, ticket_id, user, category.name)
             qr_image_buffers.append(qr_image_buffer)
         
         # Generate PDF with all the QR codes

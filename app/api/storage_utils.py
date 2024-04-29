@@ -16,6 +16,7 @@ import os
 def generate_qr_code(event_name, ticket_id, user, ticket_category):
     try:
         # Create QR Code
+        print('Generating QR code...')
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -28,11 +29,13 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
             "user": user.FirstName + " " + user.LastName,
             "ticketCategory": ticket_category
         }
+        print('QR data: ', qr_data)
         qr_data_json = json.dumps(qr_data)
         qr.add_data(qr_data_json)
         qr.make(fit=True)
         img = qr.make_image(fill='black', back_color='white')
 
+        print('QR code generated successfully')
         # Convert QR code to a file-like object
         img_buffer = io.BytesIO()
         img.save(img_buffer)
@@ -46,6 +49,7 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
 
 def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, ticket_id):
     # Create a BytesIO object to store the PDF data
+    print('Generating PDF...')
     pdf_buffer = io.BytesIO()
 
     # PDF Setup
@@ -94,7 +98,8 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
     notes_paragraph = Paragraph(notes_text, custom_style)
     story.append(notes_paragraph)
     story.append(Spacer(1, 12))
-
+    
+    print('QR image buffers: ', qr_image_buffers)
     # Adding the QR Codes
     if qr_image_buffers:
         qr_table_data = [[Image(qr_image_buffer, 2*inch, 2*inch) for qr_image_buffer in qr_image_buffers]]
@@ -123,6 +128,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
     :param object_name: S3 object name. If not specified, file_name is used
     :return: True if file was uploaded, else False
     """
+    print('Uploading to S3...')
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = file_name
@@ -136,7 +142,8 @@ def upload_to_s3(file_name, bucket, object_name=None):
     
     # Initialize S3 client
     s3_client = session.client('s3')
-    
+
+    print('Uploading to S3...')
     try:
         response = s3_client.upload_file(file_name, bucket, object_name)
         print("File uploaded successfully")
