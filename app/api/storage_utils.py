@@ -138,11 +138,13 @@ def upload_to_s3(file_name, bucket, object_name=None):
         region_name='eu-west-2'
     )
     
+    print('aws_access_key_id:', os.getenv('aws_access_key_id'))
+    print('aws_secret_access_key:', os.getenv('aws_secret_access_key'))
     # Initialize S3 client
     s3_client = session.client('s3')
 
-    print('Uploading to S3...')
     try:
+        print(f"Uploading {file_name} to S3 bucket {bucket} as {object_name}")
         response = s3_client.upload_file(file_name, bucket, object_name)
         print("File uploaded successfully")
         return jsonify({"message": "File uploaded successfully"}), 200

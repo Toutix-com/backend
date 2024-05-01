@@ -9,6 +9,7 @@ from postmarker.core import PostmarkClient
 from datetime import datetime
 from app.api.storage_utils import *
 import base64
+import random
 
 ticket_routes = Blueprint('ticket', __name__)
 
@@ -58,7 +59,8 @@ class TicketManager:
         # Convert the PDF content to base64 for attachment
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         # Upload the PDF to S3
-        s3_response = upload_to_s3(pdf_content, 'ticketpdfbucket')
+        file_name = f"{event_id}_{user.FirstName}_{random.randint(10000, 99999)}"
+        s3_response = upload_to_s3(file_name, pdf_content, 'ticketpdfbucket')
         # Send the OTP to the email address
         # Return json message to frontend
         send_email = "noreply@toutix.com"

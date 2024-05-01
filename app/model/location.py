@@ -8,9 +8,9 @@ class Location(db.Model):
     Name = db.Column(db.String(255))
     Address = db.Column(db.String(255))
     Capacity = db.Column(db.Integer)
-    longitude = db.Column(db.Float, nullable=True)
-    latitude = db.Column(db.Float, nullable=True)
-    direction_url = db.Column(db.String(255), nullable=True)
+    longitude = db.Column(db.String(255), nullable=True)
+    latitude = db.Column(db.String(255), nullable=True)
+    direction_url = db.Column(db.String(1000), nullable=True)
     events = db.relationship('Event', back_populates='location', lazy=True)  # This is a one-to-many relationship, eg a location can host many events
 
     def to_dict(self):
@@ -19,6 +19,9 @@ class Location(db.Model):
             'Name': self.Name,
             'Address': self.Address,
             'Capacity': self.Capacity,
+            'longitude': self.longitude,
+            'latitude': self.latitude,
+            'direction_url': self.direction_url
             # 'events': removed to prevent recursion
         }
         '''if include_events:
