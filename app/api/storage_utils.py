@@ -18,7 +18,6 @@ from flask import jsonify
 def generate_qr_code(event_name, ticket_id, user, ticket_category):
     try:
         # Create QR Code
-        print('Generating QR code...')
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -31,13 +30,11 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
             "user": user.FirstName + " " + user.LastName,
             "ticketCategory": ticket_category
         }
-        print('QR data: ', qr_data)
         qr_data_json = json.dumps(qr_data)
         qr.add_data(qr_data_json)
         qr.make(fit=True)
         img = qr.make_image(fill='black', back_color='white')
 
-        print('QR code generated successfully')
         # Convert QR code to a file-like object
         img_buffer = io.BytesIO()
         img.save(img_buffer)
@@ -51,7 +48,6 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
 
 def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, ticket_id):
     # Create a BytesIO object to store the PDF data
-    print('Generating PDF...')
     pdf_buffer = io.BytesIO()
 
     # PDF Setup
@@ -76,7 +72,7 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
         ['Receipt No:', ticket_id],
         ['Event Name:', event_name],
         ['Date:', 'December 12, 2024'],
-        ['Location:', location],
+        ['Location:', str(location.Address)],
         ['Attendee:', attendee_name]
     ]
     details_table = Table(details_data, colWidths=[2*inch, 4*inch])
@@ -101,7 +97,6 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
     story.append(notes_paragraph)
     story.append(Spacer(1, 12))
     
-    print('QR image buffers: ', qr_image_buffers)
     # Adding the QR Codes
     if qr_image_buffers:
         qr_table_data = [[Image(qr_image_buffer, 2*inch, 2*inch) for qr_image_buffer in qr_image_buffers]]
@@ -163,44 +158,3 @@ def download_pdf_from_s3(bucket_name, file_name):
     pdf_content = response['Body'].read()
     
     return pdf_content
-
-
-
-
-'''
- /////        USAGE      /////// 
-# Set up S3 resource with AWS credentials and region
-s3 = boto3.resource(
-    's3',
-    aws_access_key_id='YOUR_ACCESS_KEY_ID',
-    aws_secret_access_key='YOUR_SECRET_ACCESS_KEY',
-    region_name='YOUR_REGION_NAME'
-)
-
-# Define variables with specific example values
-bucket_name = 'your-s3-bucket-name'
-file_name = 'ticket.pdf'
-event_id = 123
-ticket_ids = [1, 2, 3]
-user = 'John Doe'
-ticket_categories = ['Category A', 'Category B', 'Category C']
-
-# Generate QR codes
-qr_image_buffers = []
-for i in range(len(ticket_ids)):
-    qr_image_buffer = generate_qr_code(event_id, ticket_ids[i], user, ticket_categories[i])
-    qr_image_buffers.append(qr_image_buffer)
-
-# Generate PDF with all the QR codes
-event_name = 'Example Event'
-attendee_name = 'John Doe'
-location = 'Example Location'
-pdf_content = generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, ticket_id)
-
-# Upload the PDF to S3
-s3_object = s3.Object(bucket_name, file_name)
-s3_object.put(Body=pdf_content)
-
-# Print the download link
-print(f"Your PDF is available for download at: https://s3.amazonaws.com/{bucket_name}/{file_name}")
-'''

@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from app.model import User, db
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
-import smtplib
 from postmarker.core import PostmarkClient
 
 otp_routes = Blueprint('otp', __name__)
