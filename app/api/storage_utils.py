@@ -72,7 +72,7 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
         ['Receipt No:', ticket_id],
         ['Event Name:', event_name],
         ['Date:', 'December 12, 2024'],
-        ['Location:', str(location.Address)],
+        ['Location:', location.Name],
         ['Attendee:', attendee_name]
     ]
     details_table = Table(details_data, colWidths=[2*inch, 4*inch])
