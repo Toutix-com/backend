@@ -117,19 +117,8 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
     print('PDF generated successfully')
     return pdf_buffer.getvalue()
 
-def upload_to_s3(file_name, bucket, object_name=None):
-    """
-    Upload a file to an S3 bucket
-
-    :param file_name: File to upload
-    :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified, file_name is used
-    :return: True if file was uploaded, else False
-    """
+def upload_to_s3(file, bucket, file_name):
     print('Connecting to S3...')
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
-        object_name = file_name
 
     # Initialize a session using your credentials
     session = boto3.Session(
@@ -137,16 +126,16 @@ def upload_to_s3(file_name, bucket, object_name=None):
         aws_secret_access_key= os.getenv('aws_secret_access_key'),
         region_name='eu-west-2'
     )
-    
-    print('aws_access_key_id:', os.getenv('aws_access_key_id'))
-    print('aws_secret_access_key:', os.getenv('aws_secret_access_key'))
     # Initialize S3 client
     s3_client = session.client('s3')
 
     try:
-        print(f"Uploading {file_name} to S3 bucket {bucket} as {object_name}")
-        response = s3_client.upload_file(file_name, bucket, object_name)
-        print("File uploaded successfully")
+        print('Uploading file...')
+        response = s3_client.upload_fileobj(
+            file,
+            bucket,
+            file_name
+        )
         return jsonify({"message": "File uploaded successfully"}), 200
     except FileNotFoundError:
         print("The file was not found")
