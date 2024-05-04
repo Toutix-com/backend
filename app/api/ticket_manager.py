@@ -59,7 +59,7 @@ class TicketManager:
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         pdf_content_buffer = io.BytesIO(pdf_content)
         # Upload the PDF to S3
-        file_name = f"{ticket_ids}_{user.FirstName}"
+        file_name = f"{user.Email}_{user.FirstName}"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
@@ -162,7 +162,7 @@ class TicketManager:
         if event is None:
             return jsonify({'error': 'Event not found'}), 404
 
-            # keep sellerid null for now
+        # keep sellerid null for now
         transaction = Transaction(BuyerID=self.userID, SellerID=sellerID, PaymentMethodID=paymentmethod_id,
                                   TransactionAmount=price, EventID=event_id, TransactionDate=date)
         db.session.add(transaction)
@@ -182,6 +182,21 @@ class TicketManager:
         event.total_revenue += revenu_share  # Total revenue is the 40% of the resale revenue + primary ticket sales revenue
 
         db.session.commit()
+
+        # Delete the existing PDF file in S3
+        delete_response = delete_from_s3(
+            Bucket='ticketpdfbucket',
+            Key=f"{seller.Email}_{seller.FirstName}"
+        )
+
+        # Generate new QR code with new buyer details
+        qr_image_buffer = generate_qr_code(event.Name, ticket_id, user, ticket.Category.name)
+
+        # Generate PDF with new QR code, and send the PDF to the buyer's email
+        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, user, user.Email, ticket_ids, category)
+
+        #upload to s3
+        
 
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))

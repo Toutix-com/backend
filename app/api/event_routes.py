@@ -186,8 +186,9 @@ def validate_ticket(event_id):
     total_purchased_by_user = Ticket.query.filter_by(UserID=user_id, EventID=event_id).count()
     # Modify to use a variable later
     is_eligible_to_purchase = True
-    if total_purchased_by_user + number_of_tickets > 4:
+    if total_purchased_by_user + number_of_tickets > ticket_category.max_per_person:
         is_eligible_to_purchase = False
+        error_message = 'You have reached the maximum ticket allowed for the same event.'
 
     price = TicketCategory.query.get(ticket_category_id).price
     total = price * number_of_tickets
@@ -196,9 +197,11 @@ def validate_ticket(event_id):
     tickets_left = ticket_category.max_limit - ticket_category.ticket_sold
     if tickets_left < number_of_tickets:
         is_eligible_to_purchase = False
+        error_message = 'There are not enough tickets left for this category.'
 
     return jsonify({
         'is_eligible_to_purchase': is_eligible_to_purchase,
         'total': total,
         'service': service,
+        'error_message': error_message
     }), 200

@@ -142,6 +142,21 @@ def upload_to_s3(file, bucket, file_name):
         return jsonify({"error": "The file was not found"}), 500
     except Exception as e:
         return jsonify({"error": f"Error uploading file: {str(e)}"}), 500
+    
+def delete_from_s3(bucket, file_name):
+    session = boto3.Session(
+        aws_access_key_id= os.getenv('aws_access_key_id'),
+        aws_secret_access_key= os.getenv('aws_secret_access_key'),
+        region_name='eu-west-2'
+    )
+    # Create an S3 client
+    s3_client = session.client('s3')
+
+    try:
+        s3_client.delete_object(Bucket=bucket, Key=file_name)
+        return jsonify({"message": "File deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Error deleting file: {str(e)}"}), 500
 
 def download_pdf_from_s3(bucket_name, file_name):
     s3 = boto3.client('s3')
