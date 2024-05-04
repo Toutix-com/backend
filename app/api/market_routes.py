@@ -68,6 +68,7 @@ def validate_ticket(current_user, event_id):
     user_id = data.get('user_id')
     ticket_id = data.get('ticket_id')
     ticket_category = Ticket.query.get(ticket_id).ticket_categories
+    error_message = ''
 
     ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
     user = User.query.get(user_id)
