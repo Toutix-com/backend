@@ -193,8 +193,6 @@ class TicketManager:
         except Exception as e:
             # Handle the error here, for example, log the error or print a message
             print(f"Error deleting file from S3: {e}")
-            # You can choose to continue executing the rest of the code or raise an exception
-            continue
 
         print('Delete response:', delete_response)
 
