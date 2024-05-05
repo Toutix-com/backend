@@ -61,6 +61,7 @@ class TicketManager:
         # Upload the PDF to S3
         file_name = f"{user.Email}_{user.FirstName}"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
+        print(s3_response)
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
         subject = "Booking confirmation & Ticket for {event_name}"
@@ -184,25 +185,69 @@ class TicketManager:
         db.session.commit()
 
         # Delete the existing PDF file in S3
-        delete_response = delete_from_s3(
-            Bucket='ticketpdfbucket',
-            Key=f"{seller.Email}_{seller.FirstName}"
-        )
+        try:
+            delete_response = delete_from_s3(
+                Bucket='ticketpdfbucket',
+                Key=f"{seller.Email}_{seller.FirstName}"
+            )
+        except Exception as e:
+            # Handle the error here, for example, log the error or print a message
+            print(f"Error deleting file from S3: {e}")
+            # You can choose to continue executing the rest of the code or raise an exception
+            continue
+
+        print('Delete response:', delete_response)
 
         # Generate new QR code with new buyer details
         qr_image_buffer = generate_qr_code(event.Name, ticket_id, user, ticket.Category.name)
+        qr_image_buffers = [qr_image_buffer]
 
         # Generate PDF with new QR code, and send the PDF to the buyer's email
-        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, user, user.Email, ticket_ids, category)
+         # Generate PDF with all the QR codes
+        pdf_content = generate_ticket_pdf(qr_image_buffers, event.Name, user.FirstName, event.location, ticket_id)
+        # Convert the PDF content to base64 for attachment
+        pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
+        pdf_content_buffer = io.BytesIO(pdf_content)
+        # Upload the PDF to S3
+        file_name = f"{user.Email}_{user.FirstName}"
+        s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
+        print(s3_response)
+        # Send the OTP to the email address
+        send_email = "noreply@toutix.com"
+        subject = "Booking confirmation & Ticket for {event.Name}"
 
-        #upload to s3
-        
-
-        # what do you want to be returned?
-        token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-        print(f"Transaction token: {token}")
-
-        return token
+        # Separate datetime
+        datetime_obj = datetime.strptime(str(event_DateTime), '%Y-%m-%d %H:%M:%S')
+        date = datetime_obj.date()
+        time = datetime_obj.time()
+        try:
+            postmark = PostmarkClient(server_token=self.SERVER_TOKEN, account_token=self.ACCOUNT_TOKEN)
+            email_res = postmark.emails.send_with_template(
+                TemplateId=35544926,
+                TemplateModel={
+                    "Event_Name": event_name,
+                    "User": user.FirstName + " " + user.LastName,
+                    "Event_Date": date.strftime('%Y-%m-%d'),
+                    "Event_Location": f"{event_location['Name']}, {event_location['Address']}",
+                    "Event_Time": time.strftime('%H:%M:%S'),
+                    "Ticket_number": ticket_number,
+                },
+                From=send_email,
+                To=email,
+                Attachments=[{
+                "Name": "ticket_confirmation.pdf",
+                "Content": pdf_content_base64,
+                "ContentType": "application/pdf"
+            }]
+            )
+            return jsonify({
+                "message": f"Confirmation email sent successfully to {email}"
+            })
+        except Exception as e:
+            return jsonify({"message": "Error" + str(e)}), 404
+        finally:
+            # server.quit()
+            pass
 
     def modify_ticket(self, ticket_id, new_owner_email):
         ticket = Ticket.query.get(ticket_id)
