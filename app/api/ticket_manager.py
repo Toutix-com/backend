@@ -177,9 +177,6 @@ class TicketManager:
         ticket.TransactionID = transaction.TransactionID
 
         # Ticket sales tracking
-        # Print the data types of the variables
-        print("Data type of event.resold_revenue_share_to_business:", type(event.resold_revenue_share_to_business))
-        print("Data type of event.total_revenue:", type(event.total_revenue))
         price = decimal.Decimal(price)
         event.resold_tickets += 1
         event.total_resold_revenue += float(price - ticket.initialPrice)  # Total resale revenue is the difference between the price of the ticket and the initial price
@@ -192,8 +189,8 @@ class TicketManager:
         # Delete the existing PDF file in S3
         try:
             delete_response = delete_from_s3(
-                Bucket='ticketpdfbucket',
-                Key=f"{seller.Email}_{seller.FirstName}"
+                bucket='ticketpdfbucket',
+                file_name=f"{seller.Email}_{seller.FirstName}"
             )
             print(f"Delete response: {delete_response}")
         except Exception as e:
@@ -201,7 +198,7 @@ class TicketManager:
             print(f"Error deleting file from S3: {e}")
 
         # Generate new QR code with new buyer details
-        qr_image_buffer = generate_qr_code(event.Name, ticket_id, user, ticket.Category.name)
+        qr_image_buffer = generate_qr_code(event.Name, ticket_id, user, ticket.ticket_categories.name)
         qr_image_buffers = [qr_image_buffer]
 
         # Generate PDF with new QR code, and send the PDF to the buyer's email
