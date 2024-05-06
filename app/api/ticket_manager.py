@@ -61,7 +61,7 @@ class TicketManager:
         pdf_content_buffer = io.BytesIO(pdf_content)
         # Upload the PDF to S3
         file_name = f"{user.Email}_{user.FirstName}"
-        s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
+        s3_response = upload_to_s3(pdf_content_base64, 'ticketpdfbucket', file_name)
         print(s3_response)
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
@@ -210,7 +210,7 @@ class TicketManager:
         # Upload the PDF to S3
         file_name = f"{user.Email}_{user.FirstName}"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
-        print(s3_response)
+        print('S3 response: ',s3_response)
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
         subject = "Booking confirmation & Ticket for {event.Name}"
@@ -227,7 +227,7 @@ class TicketManager:
                     "Event_Name": event_name,
                     "User": user.FirstName + " " + user.LastName,
                     "Event_Date": date.strftime('%Y-%m-%d'),
-                    "Event_Location": f"{event_location['Name']}, {event_location['Address']}",
+                    "Event_Location": f"{event.location['Name']}, {event.location['Address']}",
                     "Event_Time": time.strftime('%H:%M:%S'),
                     "Ticket_number": ticket_number,
                 },
