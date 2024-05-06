@@ -178,7 +178,6 @@ class TicketManager:
 
         # Ticket sales tracking
         # Print the data types of the variables
-        print("Data type of event.revenu_share_to_business:", type(revenu_share))
         print("Data type of event.resold_revenue_share_to_business:", type(event.resold_revenue_share_to_business))
         print("Data type of event.total_revenue:", type(event.total_revenue))
         price = decimal.Decimal(price)
