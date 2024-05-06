@@ -9,6 +9,7 @@ from postmarker.core import PostmarkClient
 from datetime import datetime
 from app.api.storage_utils import *
 import base64
+import decimal
 
 ticket_routes = Blueprint('ticket', __name__)
 
@@ -176,9 +177,14 @@ class TicketManager:
         ticket.TransactionID = transaction.TransactionID
 
         # Ticket sales tracking
+        # Print the data types of the variables
+        print("Data type of event.revenu_share_to_business:", type(revenu_share))
+        print("Data type of event.resold_revenue_share_to_business:", type(event.resold_revenue_share_to_business))
+        print("Data type of event.total_revenue:", type(event.total_revenue))
+        price = decimal.Decimal(price)
         event.resold_tickets += 1
         event.total_resold_revenue += price - ticket.initialPrice  # Total resale revenue is the difference between the price of the ticket and the initial price
-        revenu_share = (price - ticket.initialPrice) * 0.4
+        revenu_share = (price - ticket.initialPrice) * decimal.Decimal('0.4')
         event.resold_revenue_share_to_business += revenu_share  # Business gets 40% of the resale revenue
         event.total_revenue += revenu_share  # Total revenue is the 40% of the resale revenue + primary ticket sales revenue
 
