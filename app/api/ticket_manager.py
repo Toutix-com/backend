@@ -61,7 +61,7 @@ class TicketManager:
         pdf_content_buffer = io.BytesIO(pdf_content)
         # Upload the PDF to S3
         file_name = f"{user.Email}_{user.FirstName}"
-        s3_response = upload_to_s3(pdf_content_base64, 'ticketpdfbucket', file_name)
+        s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
         print(s3_response)
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
