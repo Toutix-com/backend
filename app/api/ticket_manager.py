@@ -195,11 +195,10 @@ class TicketManager:
                 Bucket='ticketpdfbucket',
                 Key=f"{seller.Email}_{seller.FirstName}"
             )
+            print(f"Delete response: {delete_response}")
         except Exception as e:
             # Handle the error here, for example, log the error or print a message
             print(f"Error deleting file from S3: {e}")
-
-        print('Delete response:', delete_response)
 
         # Generate new QR code with new buyer details
         qr_image_buffer = generate_qr_code(event.Name, ticket_id, user, ticket.Category.name)
