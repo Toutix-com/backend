@@ -182,8 +182,8 @@ class TicketManager:
         print("Data type of event.total_revenue:", type(event.total_revenue))
         price = decimal.Decimal(price)
         event.resold_tickets += 1
-        event.total_resold_revenue += price - ticket.initialPrice  # Total resale revenue is the difference between the price of the ticket and the initial price
-        revenu_share = (price - ticket.initialPrice) * decimal.Decimal('0.4')
+        event.total_resold_revenue += float(price - ticket.initialPrice)  # Total resale revenue is the difference between the price of the ticket and the initial price
+        revenu_share = float((price - ticket.initialPrice) * decimal.Decimal('0.4'))
         event.resold_revenue_share_to_business += revenu_share  # Business gets 40% of the resale revenue
         event.total_revenue += revenu_share  # Total revenue is the 40% of the resale revenue + primary ticket sales revenue
 
