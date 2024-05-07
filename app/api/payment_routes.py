@@ -6,6 +6,7 @@ from app.api.ticket_manager import TicketManager
 import os
 from app.model import PaymentMethod, User, Event, Ticket, TicketCategory, db
 from app.api.auth import token_required
+from decimal import Decimal
 
 payment_routes = Blueprint('payment', __name__)
 
@@ -180,7 +181,7 @@ def stripe_webhook():
             #Fill the original price
             print(payment_intent['metadata']['ticketID'])
             original_price = Ticket.query.get(payment_intent['metadata']['ticketID']).initialPrice
-            resale_price = payment_intent['metadata']['price']
+            resale_price = Decimal(payment_intent['metadata']['price'])
 
             if resale_price >= original_price:
                 refund_amount = int((original_price + 0.5 * (resale_price - original_price)) * 100)
@@ -192,7 +193,7 @@ def stripe_webhook():
                 seller_id = payment_intent['metadata']['sellerID']
                 user = User.query.get(seller_id)
                 user.Credit += refund_amount/100
-                print(f"Credit of {credit_amount / 100} added to seller {seller_id}")
+                print(f"Credit of {refund_amount / 100} added to seller {seller_id}")
             except Exception as e:
                 print(f"Failed to add credit for seller {seller_id}: {e}")
 
