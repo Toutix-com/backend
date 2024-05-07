@@ -178,7 +178,8 @@ def stripe_webhook():
 
             # Handles refund for seller of second hand ticket
             #Fill the original price
-            original_price = payment_intent['metadata']['initialPrice']
+            print(payment_intent['metadata']['ticketID'])
+            original_price = Ticket.query.get(payment_intent['metadata']['ticketID']).initialPrice
             resale_price = payment_intent['metadata']['price']
 
             if resale_price >= original_price:
