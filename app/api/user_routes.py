@@ -81,7 +81,7 @@ def list_ticket_on_marketplace(current_user, ticket_id):
     data = request.get_json()
     price = data.get('price')
 
-    if price > 2*ticket.initialPrice:
+    if price > 2*(ticket.initialPrice + 0.1*ticket.initialPrice):
         return jsonify({'error': 'Ticket price is too high'}), 400
     ticket.Price = price
 
