@@ -203,7 +203,7 @@ class TicketManager:
 
         # Generate PDF with new QR code, and send the PDF to the buyer's email
          # Generate PDF with all the QR codes
-        pdf_content = generate_ticket_pdf(qr_image_buffers, event.Name, user.FirstName, event.location, ticket_id)
+        pdf_content = generate_ticket_pdf(qr_image_buffers, event.Name, user.FirstName, event.location.to_dict(), ticket_id)
         # Convert the PDF content to base64 for attachment
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         pdf_content_buffer = io.BytesIO(pdf_content)
