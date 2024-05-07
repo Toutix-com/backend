@@ -216,7 +216,7 @@ class TicketManager:
         subject = "Booking confirmation & Ticket for {event.Name}"
 
         # Separate datetime
-        datetime_obj = datetime.strptime(str(event_DateTime), '%Y-%m-%d %H:%M:%S')
+        datetime_obj = datetime.strptime(str(event.DateTime), '%Y-%m-%d %H:%M:%S')
         date = datetime_obj.date()
         time = datetime_obj.time()
         try:
@@ -224,7 +224,7 @@ class TicketManager:
             email_res = postmark.emails.send_with_template(
                 TemplateId=35544926,
                 TemplateModel={
-                    "Event_Name": event_name,
+                    "Event_Name": event.Name,
                     "User": user.FirstName + " " + user.LastName,
                     "Event_Date": date.strftime('%Y-%m-%d'),
                     "Event_Location": f"{event.location['Name']}, {event.location['Address']}",
