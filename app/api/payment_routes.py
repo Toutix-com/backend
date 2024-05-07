@@ -184,9 +184,9 @@ def stripe_webhook():
             resale_price = Decimal(payment_intent['metadata']['price'])
 
             if resale_price >= original_price:
-                refund_amount = int((original_price + 0.5 * (resale_price - original_price)) * 100)
+                refund_amount = int((original_price + Decimal('0.5') * (resale_price - original_price)) * Decimal('100'))
             else:
-                refund_amount = int(resale_price * 100)
+                refund_amount = int(resale_price * Decimal('100'))
             
             try:
                 # Add the credit amount to the seller's account
