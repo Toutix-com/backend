@@ -192,7 +192,8 @@ def stripe_webhook():
                 # Add the credit amount to the seller's account
                 seller_id = payment_intent['metadata']['sellerID']
                 user = User.query.get(seller_id)
-                user.Credit += refund_amount/100
+                refund_amount_cents = refund_amount / 100
+                user.Credit = (user.Credit or 0) + refund_amount_cents
                 print(f"Credit of {refund_amount / 100} added to seller {seller_id}")
             except Exception as e:
                 print(f"Failed to add credit for seller {seller_id}: {e}")
