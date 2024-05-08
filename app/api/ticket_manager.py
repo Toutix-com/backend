@@ -10,6 +10,7 @@ from datetime import datetime
 from app.api.storage_utils import *
 import base64
 import decimal
+import uuid
 
 ticket_routes = Blueprint('ticket', __name__)
 
@@ -46,7 +47,7 @@ class TicketManager:
         self.SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
         self.ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
 
-    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email, ticket_ids, category):
+    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email, ticket_ids, category, event_id):
         
         # Generate QR codes for each ticket
         qr_image_buffers = []
@@ -60,9 +61,9 @@ class TicketManager:
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         pdf_content_buffer = io.BytesIO(pdf_content)
         # Upload the PDF to S3
-        file_name = f"{user.Email}_{user.FirstName}"
+        unique_id = uuid.uuid4().hex[:4]
+        file_name = f"{event_id}_{user.FirstName}_{unique_id}.pdf"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
-        print(s3_response)
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
         subject = "Booking confirmation & Ticket for {event_name}"
@@ -140,7 +141,7 @@ class TicketManager:
         db.session.commit()
 
         # Send confirmation email
-        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, user, user.Email, ticket_ids, category)
+        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, user, user.Email, ticket_ids, category, event_id)
         print('Confirmation email sent!' + str(user.Email))
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -208,7 +209,8 @@ class TicketManager:
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         pdf_content_buffer = io.BytesIO(pdf_content)
         # Upload the PDF to S3
-        file_name = f"{user.Email}_{user.FirstName}"
+        unique_id = uuid.uuid4().hex[:4]
+        file_name = f"{event_id}_{user.FirstName}_{unique_id}.pdf"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
         print('S3 response: ',s3_response)
         # Send the OTP to the email address
