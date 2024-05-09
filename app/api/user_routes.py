@@ -37,6 +37,19 @@ def get_ticket_by_ids(current_user, ticket_id):
         return ticket.to_dict()
     else:
         return jsonify({'error': 'Ticket not found'}), 404
+    
+@user_routes.route('/me/tickets/<string:ticket_id>/download', methods=['GET'])
+@token_required
+def download_ticket(current_user, ticket_id):
+    ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
+
+    if ticket is None:
+        return jsonify({'error': 'Ticket not found'}), 404
+    
+    if ticket.to_pdf() is None:
+        return jsonify({'error': 'Ticket QR code not found'}), 404
+    
+    return ticket.to_pdf()
 
 @user_routes.route('/me/update', methods=['PUT'])
 @token_required
