@@ -22,6 +22,7 @@ class Ticket(db.Model):
     CategoryID = db.Column(UUID(as_uuid=True), db.ForeignKey('ticket_categories.CategoryID'))
     CreationDate = db.Column(db.DateTime, server_default=db.func.now())
     QR_STATUS = db.Column(db.Boolean, default=False)
+    pdf_name = db.Column(db.String(255), nullable=True)
 
     user = db.relationship('User', back_populates='tickets')
     transactions = db.relationship('Transaction', back_populates='tickets') # Singular, assuming one-to-many from Transaction to Ticket

@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from app.model import User, db
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
-import smtplib
 from postmarker.core import PostmarkClient
 
 otp_routes = Blueprint('otp', __name__)
@@ -67,7 +66,7 @@ class OTPManager:
             # company_name: toutix
             # company_address: Durham Univeristy, Venture Lab. DH1 3SG
 
-            postmark.emails.send_with_template(
+            email_res = postmark.emails.send_with_template(
                 TemplateId=35527163,
                 TemplateModel={
                     "otp": self.otp,
@@ -77,6 +76,7 @@ class OTPManager:
                 From=send_email,
                 To=self.email,
             )
+            print(email_res)
             return jsonify({
                 "message": f"OTP sent successfully to {self.email}",
                 "otp_expiry": expiry_iso,

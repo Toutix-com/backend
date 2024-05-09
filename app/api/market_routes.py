@@ -67,6 +67,8 @@ def validate_ticket(current_user, event_id):
     data = request.json
     user_id = data.get('user_id')
     ticket_id = data.get('ticket_id')
+    ticket_category = Ticket.query.get(ticket_id).ticket_categories
+    error_message = ''
 
     ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
     user = User.query.get(user_id)
@@ -76,27 +78,31 @@ def validate_ticket(current_user, event_id):
     # Check if seller = buyer
     if ticket.UserID == user_id:
         is_eligible_to_purchase = False
+        error_message = 'You cannot buy your own ticket'
     
     # Check if it has been admited/sold
     if ticket.Status == StatusEnum.Admitted:
         is_eligible_to_purchase = False
+        error_message = 'Ticket used, can not be purchased'
     if ticket.Status == StatusEnum.Sold:
         is_eligible_to_purchase = False
+        error_message = 'Ticket has been sold, can not be purchased'
     
     total_purchased_by_user = Ticket.query.filter_by(UserID=user_id, EventID=event_id).count()
     # Modify to use a variable later
 
     # Check if user is eligible to purchase
-    if total_purchased_by_user + 1 > 4:
+    if total_purchased_by_user + 1 > ticket_category.max_limit:
         is_eligible_to_purchase = False
+        error_message = 'You have reached the maximum ticket allowed for the same event.'
 
     price = ticket.Price
     service = price * Decimal('0.1')
-    total = price + service
 
     return jsonify({
         'is_eligible_to_purchase': is_eligible_to_purchase,
-        'total': float(total),
+        'total': price,
         'service': float(service),
+        'error_message': error_message
     }), 200
   

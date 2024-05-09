@@ -6,6 +6,7 @@ from app.api.ticket_manager import TicketManager
 import os
 from app.model import PaymentMethod, User, Event, Ticket, TicketCategory, db
 from app.api.auth import token_required
+from decimal import Decimal
 
 payment_routes = Blueprint('payment', __name__)
 
@@ -28,11 +29,11 @@ def charge(current_user):
 
     # if user has more than 4 tickets for the same eventid, return error
     user_tickets = Ticket.query.filter_by(UserID=user_id, EventID=event_id).all()
-    if len(user_tickets) + number_of_tickets > 4:
-        return jsonify({"error": "You can only purchase a maximum of 4 tickets for the same event."}), 400
+    ticket_category = TicketCategory.query.get(ticket_category_id)
+    if len(user_tickets) + number_of_tickets > ticket_category.max_per_person:
+        return jsonify({"error": "You have reached the maximum ticket allowed for the same event."}), 400
     
     # Check inventory to see if there are enough tickets
-    ticket_category = TicketCategory.query.get(ticket_category_id)
     if ticket_category.ticket_sold + number_of_tickets > ticket_category.max_limit:
         return jsonify({"error": "Not enough tickets available"}), 400
     
@@ -178,19 +179,28 @@ def stripe_webhook():
 
             # Handles refund for seller of second hand ticket
             #Fill the original price
-            original_price = payment_intent['metadata']['initialPrice']
-            resale_price = payment_intent['metadata']['price']
+            print(payment_intent['metadata']['ticketID'])
+            original_price = Decimal(Ticket.query.get(payment_intent['metadata']['ticketID']).initialPrice)
+            resale_price = Decimal(payment_intent['metadata']['price'])
+
             if resale_price >= original_price:
-                refund_amount = int((original_price + 0.5 * (resale_price - original_price)) * 100)
+                refund_amount = int((original_price + Decimal('0.5') * (resale_price - original_price)) * Decimal('100'))
             else:
-                refund_amount = int(resale_price * 100)
+                refund_amount = int(resale_price * Decimal('100'))
             
             try:
-                # Replace the payment intent id with the sellers ID
-                stripe.Refund.create(payment_intent=payment_intent['id'], amount=refund_amount)
-                print(f"Refund of {refund_amount / 100} for payment intent {payment_intent.id} successful")
-            except stripe.error.StripeError as e:
-                print(f"Failed to refund for payment intent {payment_intent.id}: {e}")
+                # Add the credit amount to the seller's account
+                seller_id = payment_intent['metadata']['sellerID']
+                user = User.query.get(seller_id)
+                user.Credit += refund_amount / 100
+                print(f"Credit of {refund_amount / 100} added to seller {seller_id}")
+                # Commit the changes to the database
+                db.session.commit()
+                print("Changes committed successfully")
+            except Exception as e:
+                print(f"Failed to add credit for seller {seller_id}: {e}")
+
+
     # Respond to the event
     return '', 200
 
