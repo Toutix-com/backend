@@ -15,8 +15,6 @@ class Discount(db.Model):
     usage_limit = db.Column(db.Integer, nullable=True)
     times_used = db.Column(db.Integer, default=0)
 
-    tickets = db.relationship('Ticket', backref='discounts', lazy=True)
-
     def to_dict(self):
         return {
             'DiscountID': self.DiscountID,
