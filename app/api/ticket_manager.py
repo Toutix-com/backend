@@ -64,6 +64,13 @@ class TicketManager:
         unique_id = uuid.uuid4().hex[:4]
         file_name = f"{event_id}_{user.FirstName}_{unique_id}.pdf"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
+
+        # Appending PDF file name to ticket table
+        for ticket_id in ticket_ids:
+            ticket = Ticket.query.get(ticket_id)
+            ticket.pdf_name = file_name
+            db.session.commit()
+
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
         subject = "Booking confirmation & Ticket for {event_name}"
@@ -212,7 +219,11 @@ class TicketManager:
         unique_id = uuid.uuid4().hex[:4]
         file_name = f"{event_id}_{user.FirstName}_{unique_id}.pdf"
         s3_response = upload_to_s3(pdf_content_buffer, 'ticketpdfbucket', file_name)
-        print('S3 response: ',s3_response)
+
+        # Appending PDF file name to ticket table
+        ticket.pdf_name = file_name
+        db.session.commit()
+        
         # Send the OTP to the email address
         send_email = "noreply@toutix.com"
         subject = "Booking confirmation & Ticket for {event.Name}"

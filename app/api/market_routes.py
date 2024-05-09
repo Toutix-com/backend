@@ -97,12 +97,10 @@ def validate_ticket(current_user, event_id):
         error_message = 'You have reached the maximum ticket allowed for the same event.'
 
     price = ticket.Price
-    service = price * Decimal('0.1')
-    total = price + service
 
     return jsonify({
         'is_eligible_to_purchase': is_eligible_to_purchase,
-        'total': float(total),
+        'total': price,
         'service': float(service),
         'error_message': error_message
     }), 200
