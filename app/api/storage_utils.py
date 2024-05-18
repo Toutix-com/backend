@@ -158,9 +158,25 @@ def delete_from_s3(bucket, file_name):
     except Exception as e:
         return jsonify({"error": f"Error deleting file: {str(e)}"}), 500
 
-def download_pdf_from_s3(bucket_name, file_name):
-    s3 = boto3.client('s3')
-    response = s3.get_object(Bucket=bucket_name, Key=file_name)
-    pdf_content = response['Body'].read()
-    
-    return pdf_content
+def download_pdf_from_s3(key):
+    session = boto3.Session(
+        aws_access_key_id= os.getenv('aws_access_key_id'),
+        aws_secret_access_key= os.getenv('aws_secret_access_key'),
+        region_name='eu-west-2'
+    )
+    # Create an S3 client
+    s3_client = session.client('s3')
+
+    # Specify the bucket name and the key of the PDF to be deleted
+    bucket = 'ticketpdfbucket'
+
+    try:
+        # Generate pre-signed URL
+        url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': bucket, 'Key': key},
+            ExpiresIn=60
+        )
+        return url
+    except Exception as e:
+        return jsonify({"error": f"Error generating URL: {str(e)}"}), 500

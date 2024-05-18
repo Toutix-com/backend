@@ -4,6 +4,7 @@ from datetime import datetime
 from app.model import User, Ticket, Event, db, Transaction, MarketplaceListing, StatusEnum
 from app.api.auth import token_required
 from decimal import Decimal
+from app.api.storage_utils import *
 
 user_routes = Blueprint('users', __name__)
 
@@ -46,10 +47,10 @@ def download_ticket(current_user, ticket_id):
     if ticket is None:
         return jsonify({'error': 'Ticket not found'}), 404
     
-    if ticket.to_pdf() is None:
+    if ticket.pdf_name is None:
         return jsonify({'error': 'Ticket QR code not found'}), 404
     
-    return ticket.to_pdf()
+    return download_pdf_from_s3(ticket.pdf_name)
 
 @user_routes.route('/me/update', methods=['PUT'])
 @token_required
