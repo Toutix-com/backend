@@ -1,6 +1,5 @@
 To update any changes to database:
 
-
 flask db migrate ->
 flask db upgrade
 
