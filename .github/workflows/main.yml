@@ -23,11 +23,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Set up Python 3.11.8 environment
-      - name: Set up Python 3.11.8
+      # Set up Python 3.11 environment
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11.8"
+          python-version: "3.11"
 
       # Install dependencies
       - name: Install dependencies
@@ -45,11 +45,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
 
-      # Set up Python 3.11.8 environment
-      - name: Set up Python 3.11.8
+      # Set up Python 3.11 environment
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11.8"
+          python-version: "3.11"
 
       # Elastic Beanstalk CLI version
       - name: Get EB CLI version
@@ -69,7 +69,7 @@ jobs:
       # Create the Elastic Beanstalk application
       - name: Create EBS application
         run: |
-          eb init -p python-3.11.8 Toutix-Backend --region eu-west-2
+          eb init -p python-3.11 Toutix-Backend --region eu-west-2
 
       # Deploy to (or Create) the Elastic Beanstalk environment
       - name: Create test environment & deploy
