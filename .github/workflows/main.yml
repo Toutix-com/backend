@@ -72,6 +72,6 @@ jobs:
           eb init -p python-3.11 Toutix-Backend --region eu-west-2
 
       # Deploy to (or Create) the Elastic Beanstalk environment
-      - name: Create test environment & deploy
+      - name: Create toutix-backend-test & deploy
         run: |
-          (eb use test-environment && eb status test-environment && eb deploy) || eb create test-environment
+          (eb use toutix-backend-test && eb status toutix-backend-test && eb deploy) || eb create toutix-backend-test
