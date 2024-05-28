@@ -47,16 +47,17 @@ class TicketManager:
         self.SERVER_TOKEN = "da6e6935-98c1-4578-bd01-11e5a76897f3"
         self.ACCOUNT_TOKEN = "a8ae4cbf-763f-4032-ae42-d75dff804fde"
 
-    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user, email, ticket_ids, category, event_id):
+    def send_confirmation(self, event_name, event_DateTime, event_location, ticket_number, user_id, email, ticket_ids, category, event_id):
         
         # Generate QR codes for each ticket
         qr_image_buffers = []
         for ticket_id in ticket_ids:
-            qr_image_buffer = generate_qr_code(event_name, ticket_id, user, category.name)
+            qr_image_buffer = generate_qr_code(event_id, ticket_id, user_id, category.CategoryID)
             qr_image_buffers.append(qr_image_buffer)
         
         # Generate PDF with all the QR codes
-        pdf_content = generate_ticket_pdf(qr_image_buffers, event_name, user.FirstName, event_location, ticket_number)
+        user = User.query.get(user_id)
+        pdf_content = generate_ticket_pdf(qr_image_buffers, event_name, user.FirstName, event_location, ticket_number, event_DateTime)
         # Convert the PDF content to base64 for attachment
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         pdf_content_buffer = io.BytesIO(pdf_content)
@@ -148,7 +149,7 @@ class TicketManager:
         db.session.commit()
 
         # Send confirmation email
-        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, user, user.Email, ticket_ids, category, event_id)
+        self.send_confirmation(event.Name, event.DateTime, event.location.to_dict(), quantity, self.userID, user.Email, ticket_ids, category, event_id)
         print('Confirmation email sent!' + str(user.Email))
         # what do you want to be returned?
         token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -206,12 +207,12 @@ class TicketManager:
             print(f"Error deleting file from S3: {e}")
 
         # Generate new QR code with new buyer details
-        qr_image_buffer = generate_qr_code(event.Name, ticket_id, user, ticket.ticket_categories.name)
+        qr_image_buffer = generate_qr_code(event_id, ticket_id, self.userID, ticket.ticket_categories.CategoryID)
         qr_image_buffers = [qr_image_buffer]
 
         # Generate PDF with new QR code, and send the PDF to the buyer's email
          # Generate PDF with all the QR codes
-        pdf_content = generate_ticket_pdf(qr_image_buffers, event.Name, user.FirstName, event.location.to_dict(), ticket_id)
+        pdf_content = generate_ticket_pdf(qr_image_buffers, event.Name, user.FirstName, event.location.to_dict(), ticket_id, event.DateTime)
         # Convert the PDF content to base64 for attachment
         pdf_content_base64 = base64.b64encode(pdf_content).decode('utf-8')
         pdf_content_buffer = io.BytesIO(pdf_content)
