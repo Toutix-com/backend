@@ -15,7 +15,7 @@ from flask import jsonify
 
 ''' ADD ERROR HANDLING IN THIS CODE, to account for the case where the QR code generation fails, PDF upload failure ..
 '''
-def generate_qr_code(event_name, ticket_id, user, ticket_category):
+def generate_qr_code(event_id, ticket_id, user_id, category_id):
     try:
         # Create QR Code
         qr = qrcode.QRCode(
@@ -25,10 +25,10 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
             border=4,
         )
         qr_data = {
-            "eventName": event_name,
+            "eventId": str(event_id),
             "ticketId": str(ticket_id),
-            "user": user.FirstName + " " + user.LastName,
-            "ticketCategory": ticket_category
+            "userId": str(user_id),
+            "ticketCategoryId": str(category_id)
         }
         qr_data_json = json.dumps(qr_data)
         qr.add_data(qr_data_json)
@@ -46,7 +46,7 @@ def generate_qr_code(event_name, ticket_id, user, ticket_category):
         print(f"Error generating QR code: {str(e)}")
         return None
 
-def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, ticket_id):
+def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, ticket_id, event_DateTime):
     # Create a BytesIO object to store the PDF data
     pdf_buffer = io.BytesIO()
 
@@ -71,7 +71,7 @@ def generate_ticket_pdf(qr_image_buffers, event_name, attendee_name, location, t
     details_data = [
         ['Receipt No:', ticket_id],
         ['Event Name:', event_name],
-        ['Date:', 'December 12, 2024'],
+        ['Date:', event_DateTime.strftime('%d %B, %Y')],
         ['Location:', location['Name']],
         ['Attendee:', attendee_name]
     ]
