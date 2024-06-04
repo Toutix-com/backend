@@ -1,1 +1,1 @@
-web: cd /var/app/current/app;source /var/app/venv/staging-LQM1lest/bin/activate;flask db upgrade; gunicorn -w 2 __init__.app
+web: cd /var/app/current/app;source /var/app/venv/staging-LQM1lest/bin/activate;flask db upgrade;
