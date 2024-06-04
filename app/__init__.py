@@ -35,3 +35,8 @@ def api_index():
         app.view_functions[rule.endpoint].__doc__]
         for rule in app.url_map.iter_rules() if rule.endpoint != 'static'}
     return route_list
+if __name__ == "__main__":
+ # Setting debug to True enables debug output. This line should be
+ # removed before deploying a production app.
+ #  application.debug =True
+    application.run()
