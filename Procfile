@@ -1,1 +1,1 @@
-web: pwd;cd ./app;flask db upgrade; gunicorn app:app
+web: pwd;cd /var/app/current;flask db upgrade; gunicorn __init__:app
