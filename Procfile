@@ -1,1 +1,1 @@
-web: ls /var/app/venv/staging-LQM1lest;pwd;cd /var/app/current/app;ls;source /var/app/venv/staging-LQM1lest/bin/activate;flask db upgrade; gunicorn app:app
+web: ls /var/app/venv/staging-LQM1lest;pwd;cd /var/app/current/app;ls;source /var/app/venv/staging-LQM1lest/bin/activate;flask db upgrade;
