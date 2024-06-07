@@ -41,7 +41,8 @@ def index():
     return "hello"
 
 if __name__ == "__main__":
- # Setting debug to True enables debug output. This line should be
- # removed before deploying a production app.
- #  application.debug =True
+    # Setting debug to True enables debug output. This line should be
+    # removed before deploying a production app.
+    #  application.debug =True
+ 
     app.run(port=5000)
