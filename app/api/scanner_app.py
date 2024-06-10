@@ -15,10 +15,14 @@ def ticket_validate(event_id):
     ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id, EventID=event_id, CategoryID=category_id).first()
     
     if ticket:
-        user_name = User.query.get(user_id).FirstName + ' ' + User.query.get(user_id).LastName
+        user = User.query.get(user_id)
+        if user is not None:
+            user_name = user.FirstName + ' ' + user.LastName
+        else:
+            return jsonify({'message': 'User not found'}), 404
         event = Event.query.get(event_id).Name
         location = Location.query.get(Event.query.get(event_id).LocationID).Name
-        ticket_category = TicketCategory.query.get(category_id).Name
+        ticket_category = TicketCategory.query.get(category_id).name
         if not ticket.QR_STATUS:
             ticket.QR_STATUS = True
             db.session.commit()
