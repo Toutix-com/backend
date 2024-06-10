@@ -3,16 +3,11 @@ from app.model import Event, Location,db, Ticket, TicketCategory, User
 
 validater_routes = Blueprint('validater', __name__)
 
-@validater_routes.route('/<event_id>/ticket_info', methods=['POST'])
-def ticket_validate(event_id):
-    data = request.json
-    event_id = data.get('eventId')
-    ticket_id = data.get('ticketId')
-    user_id = data.get('userId')
-    category_id = data.get('ticketCategoryId')
+@validater_routes.route('/<ticket_id>/ticket_info', methods=['POST'])
+def ticket_validate(ticket_id):
 
     # Validate the ticket
-    ticket = Ticket.query.filter_by(TicketID=ticket_id, UserID=user_id, EventID=event_id, CategoryID=category_id).first()
+    ticket = Ticket.query.filter_by(TicketID=ticket_id).first()
     
     if ticket:
         user = User.query.get(user_id)
@@ -26,8 +21,8 @@ def ticket_validate(event_id):
         if not ticket.QR_STATUS:
             ticket.QR_STATUS = True
             db.session.commit()
-            return jsonify({'message': 'Ticket is valid', 'user_name': user_name, 'event': event, 'location': location, 'ticket_category': ticket_category}), 200
+            return jsonify({'message': 'Ticket is valid','valid': True, 'user_name': user_name, 'event': event, 'location': location, 'ticket_category': ticket_category}), 200
         else:
-            return jsonify({'message': 'Ticket has already been validated', 'user_name': user_name, 'event': event, 'location': location, 'ticket_category': ticket_category}), 400
+            return jsonify({'message': 'Ticket has already been validated', 'valid': False, 'user_name': user_name, 'event': event, 'location': location, 'ticket_category': ticket_category}), 400
     else:
         return jsonify({'message': 'Ticket not found'}), 404
