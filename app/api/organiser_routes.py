@@ -54,7 +54,7 @@ def ticket_info( event_id):
             attendee.CreationDate,
             attendee.QR_STATUS,
             attendee.TransactionID,
-            attendee.TicketCategory.name,
+            attendee.ticket_categories.name,
             'Yes' if attendee.QR_STATUS == 'Admitted' else 'No'
         ])
         
