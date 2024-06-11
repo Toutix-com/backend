@@ -4,7 +4,7 @@ from app.model import User, Ticket, Event, db, TicketCategory
 from app.api.auth import token_required
 from sqlalchemy import func
 import csv
-from io import StringIO
+from io import BytesIO, StringIO
 from flask import make_response, send_file
 
 organiser_routes = Blueprint('organiser', __name__)
@@ -39,29 +39,6 @@ def ticket_info( event_id):
     # Attendee List
     attendee_list = Ticket.query.join(User).join(TicketCategory).filter(Ticket.EventID == event_id, Ticket.UserID == User.UserID).add_columns(User.FirstName, User.LastName, User.Email, Ticket.CreationDate, Ticket.QR_STATUS, Ticket.TransactionID, TicketCategory.name).all()
     
-    # Convert the attendee list to a CSV
-    csv_file = StringIO()
-    writer = csv.writer(csv_file)
-    
-    # Write the header row
-    writer.writerow(['FirstName', 'LastName', 'Email', 'CreationDate', 'QR_STATUS', 'TransactionID', 'TicketCategoryName', 'Admitted'])
-    
-    # Write each attendee as a row
-    for attendee in attendee_list:
-        writer.writerow([
-            attendee.FirstName,
-            attendee.LastName,
-            attendee.Email,
-            attendee.CreationDate,
-            attendee.QR_STATUS,
-            attendee.TransactionID,
-            attendee.name,
-            'Yes' if attendee.QR_STATUS == 'Admitted' else 'No'
-        ])
-        
-    # Reset the file pointer to the beginning
-    csv_file.seek(0)
-    
     # Resold tickets
     resold_tickets = event.resold_tickets
     total_resold_revenue = event.total_resold_revenue
@@ -85,7 +62,6 @@ def ticket_info( event_id):
     }
     for item in attendee_list
 ],
-        'Response_CSV': send_file(csv_file, as_attachment=True, download_name='attendee_list.csv', mimetype='text/csv'),
         'Resold_Tickets': resold_tickets,
         'Total_Resold_Revenue': total_resold_revenue,
         'Resold_Revenue_Share_to_Business': resold_revenu_share_to_business,
@@ -94,3 +70,46 @@ def ticket_info( event_id):
     }
 
     return jsonify(response), 200
+
+@organiser_routes.route('/<event_id>/download_csv', methods=['GET'])
+def download_csv(event_id):
+    # Attendee List
+    attendee_list = Ticket.query.join(User).join(TicketCategory).filter(
+        Ticket.EventID == event_id, Ticket.UserID == User.UserID).add_columns(
+        User.FirstName, User.LastName, User.Email, Ticket.CreationDate, Ticket.QR_STATUS,
+        Ticket.TransactionID, TicketCategory.name).all()
+
+    # Generate CSV
+    csv_file = StringIO()
+    writer = csv.writer(csv_file)
+
+    # Write the header row
+    writer.writerow(['FirstName', 'LastName', 'Email', 'CreationDate', 'QR_STATUS', 'TransactionID', 'TicketCategoryName', 'Admitted'])
+
+    # Write each attendee as a row
+    for attendee in attendee_list:
+        writer.writerow([
+            attendee.FirstName,
+            attendee.LastName,
+            attendee.Email,
+            attendee.CreationDate.isoformat(),
+            attendee.QR_STATUS,
+            attendee.TransactionID,
+            attendee.name,
+            'Yes' if attendee.QR_STATUS == 'Admitted' else 'No'
+        ])
+
+    # Reset the file pointer to the beginning
+    csv_file.seek(0)
+
+    # Convert StringIO to BytesIO for send_file
+    bytes_file = BytesIO()
+    bytes_file.write(csv_file.getvalue().encode('utf-8'))
+    bytes_file.seek(0)
+
+    return send_file(
+        bytes_file,
+        as_attachment=True,
+        download_name='attendee_list.csv',
+        mimetype='text/csv'
+    )
