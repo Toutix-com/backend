@@ -3,8 +3,6 @@ from flask_login import login_required
 from app.model import User, Ticket, Event, db, TicketCategory
 from app.api.auth import token_required
 from sqlalchemy import func
-import csv
-from io import StringIO
 
 organiser_routes = Blueprint('organiser', __name__)
 
@@ -37,35 +35,6 @@ def ticket_info( event_id):
     total_tickets = sum(category.max_limit for category in TicketCategory.query.filter_by(EventID=event_id))
     # Attendee List
     attendee_list = Ticket.query.join(User).join(TicketCategory).filter(Ticket.EventID == event_id, Ticket.UserID == User.UserID).add_columns(User.FirstName, User.LastName, User.Email, Ticket.CreationDate, Ticket.QR_STATUS, Ticket.TransactionID, TicketCategory.name).all()
-    
-    # Convert the attendee list to a CSV
-    csv_file = StringIO()
-    writer = csv.writer(csv_file)
-    
-    # Write the header row
-    writer.writerow(['FirstName', 'LastName', 'Email', 'CreationDate', 'QR_STATUS', 'TransactionID', 'TicketCategoryName', 'Admitted'])
-    
-    # Write each attendee as a row
-    for attendee in attendee_list:
-        writer.writerow([
-            attendee.FirstName,
-            attendee.LastName,
-            attendee.Email,
-            attendee.CreationDate,
-            attendee.QR_STATUS,
-            attendee.TransactionID,
-            attendee.TicketCategory.name,
-            'Yes' if attendee.QR_STATUS == 'Admitted' else 'No'
-        ])
-        
-    # Reset the file pointer to the beginning
-    csv_file.seek(0)
-    
-    # Create a response with the CSV file
-    response_csv = make_response(csv_file.getvalue())
-    response_csv.headers["Content-Disposition"] = "attachment; filename=attendee_list.csv"
-    response_csv.headers["Content-Type"] = "text/csv"
-    
     # Resold tickets
     resold_tickets = event.resold_tickets
     total_resold_revenue = event.total_resold_revenue
@@ -89,7 +58,6 @@ def ticket_info( event_id):
     }
     for item in attendee_list
 ],
-        'Response_CSV': response_csv,
         'Resold_Tickets': resold_tickets,
         'Total_Resold_Revenue': total_resold_revenue,
         'Resold_Revenue_Share_to_Business': resold_revenu_share_to_business,
