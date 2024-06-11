@@ -5,6 +5,7 @@ from app.api.auth import token_required
 from sqlalchemy import func
 import csv
 from io import StringIO
+from flask import make_response, send_file
 
 organiser_routes = Blueprint('organiser', __name__)
 
@@ -61,11 +62,6 @@ def ticket_info( event_id):
     # Reset the file pointer to the beginning
     csv_file.seek(0)
     
-    # Create a response with the CSV file
-    response_csv = make_response(csv_file.getvalue())
-    response_csv.headers["Content-Disposition"] = "attachment; filename=attendee_list.csv"
-    response_csv.headers["Content-Type"] = "text/csv"
-    
     # Resold tickets
     resold_tickets = event.resold_tickets
     total_resold_revenue = event.total_resold_revenue
@@ -89,7 +85,7 @@ def ticket_info( event_id):
     }
     for item in attendee_list
 ],
-        'Response_CSV': response_csv,
+        'Response_CSV': send_file(csv_file, as_attachment=True, download_name='attendee_list.csv', mimetype='text/csv'),
         'Resold_Tickets': resold_tickets,
         'Total_Resold_Revenue': total_resold_revenue,
         'Resold_Revenue_Share_to_Business': resold_revenu_share_to_business,
