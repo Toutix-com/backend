@@ -10,6 +10,7 @@ from .market_routes import market_routes
 from .organiser_routes import organiser_routes
 from .scanner_app import validater_routes
 
+
 api = Blueprint('api', __name__)
 
 api.register_blueprint(auth_routes, url_prefix='/auth')
@@ -22,3 +23,4 @@ api.register_blueprint(ticket_routes, url_prefix='/ticket')
 api.register_blueprint(market_routes, url_prefix='/market')
 api.register_blueprint(organiser_routes, url_prefix='/organiser')
 api.register_blueprint(validater_routes, url_prefix='/validater')
+

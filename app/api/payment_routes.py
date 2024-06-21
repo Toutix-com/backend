@@ -4,9 +4,10 @@ from flask_jwt_extended import jwt_required
 #from app.config import STRIPE_SECRET_KEY
 from app.api.ticket_manager import TicketManager
 import os
-from app.model import PaymentMethod, User, Event, Ticket, TicketCategory, db
+from app.model import PaymentMethod, User, Event, Ticket, TicketCategory, db, Discount
 from app.api.auth import token_required
 from decimal import Decimal
+from datetime import datetime
 
 payment_routes = Blueprint('payment', __name__)
 
@@ -23,6 +24,7 @@ def charge(current_user):
     ticket_category_id = data.get('ticket_category_id')
     event_id = data.get('event_id')
     number_of_tickets = data.get('number_of_tickets')
+    coupon_code = data.get('coupon_code')
 
     if not user_id or not event_id or not ticket_category_id:
         return jsonify({"error": "Event and Ticket details are required."}), 400
@@ -46,6 +48,25 @@ def charge(current_user):
         # Calculate the amount based on ticket price and number of tickets
         amount = ticket_category.price * number_of_tickets
         currency = 'gbp'  # Assuming currency is USD
+        # Apply discount if coupon code is provided
+        if coupon_code:
+            coupon = Discount.query.filter_by(DiscountID=coupon_code).first()
+            current_datetime = datetime.now()
+            if not coupon:
+                return jsonify({"error": "Invalid coupon code"}), 400
+            if coupon.times_used >= coupon.usage_limit:
+                return jsonify({"error": "Coupon code has reached its usage limit"}), 400
+            if coupon.valid_from > current_datetime:
+                return jsonify({"error": "Coupon code is not valid yet"}), 400
+            if coupon.valid_until < current_datetime:
+                return jsonify({"error": "Coupon code has expired"}), 400
+        if coupon.discount_type == 'percentage':
+            amount = amount * (1 - coupon.discount_value)
+        elif coupon.discount_type == 'fixed':
+            amount = amount - coupon.discount_value
+        
+        coupon.times_used += 1
+        db.session.commit()
 
         # Calculate service fee
         service = amount * 0.1
@@ -204,3 +225,19 @@ def stripe_webhook():
     # Respond to the event
     return '', 200
 
+@payment_routes.route('/coupon', methods=['POST'])
+def create_coupon():
+    data = request.get_json()
+
+    new_discount = Discount(
+        discount_type=data['discount_type'],
+        discount_value=data['discount_value'],
+        valid_from=datetime.strptime(data['valid_from'], '%Y-%m-%d %H:%M:%S'),  # Format example: '2022-12-31 23:59:59'
+        valid_until=datetime.strptime(data['valid_until'], '%Y-%m-%d %H:%M:%S'),  # Format example: '2023-01-01 00:00:00'
+        usage_limit=data.get('usage_limit'),
+    )
+
+    db.session.add(new_discount)
+    db.session.commit()
+    
+    return jsonify(new_discount.to_dict()), 201
